@@ -50,7 +50,7 @@ var firebaseConfig = {
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
 ```
-
+このコードのxxxxxを
 ```
 FIREBAE_API_KEY = "xxxxx"
 FIREBASE_AUTH_DOMAIN = "xxxxx"
@@ -60,6 +60,8 @@ FIREBASE_MESSAGING_SENDER_ID = "xxxxx"
 FIREBASE_APP_ID = "xxxxx"
 MEASUREMENT_ID = "xxxxx"
 ```
+このように。
+
 ローカルで動作させるとfirestoreのインデックスを作成するアラートがでるのでエラーメッセージのURLから作成してください。
 
 ### Google Translate APIへのアクセス
@@ -93,6 +95,7 @@ FIREBASE_ADMINSDK_client_x509_cert_url = ""
 `ROOT_URL = "http://localhost:3000"`
 
 Heroku等で動かす場合はこれらをインスタンスの環境編集に登録してください。認証情報になりますので、公開リポジトリには含めないように注意してください。
+なおHerokuのインスタンスに環境変数としてFIREBASE_ADMINSDK_private_keyをセットする時は\nを実際の改行に置換してセットしてください。
 
 
 
