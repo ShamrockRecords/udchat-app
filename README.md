@@ -1,8 +1,7 @@
-# udchat-app
+# UDChat - 自動翻訳機能付きグループチャット
 
 ## 動かし方
 1. npm install
-
 
 2. .envを作成してプロジェクト直下に配置
 
