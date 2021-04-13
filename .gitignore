@@ -105,3 +105,6 @@ dist
 
 # firebase
 firebase-adminsdk.json
+
+# vscode
+.vscode
