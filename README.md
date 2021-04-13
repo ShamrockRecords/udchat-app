@@ -62,6 +62,12 @@ FIREBASE_APP_ID = "xxxxx"
 MEASUREMENT_ID = "xxxxx"
 ```
 
+### Google Translate APIへのアクセス
+
+Google CloudコンソールでGoogle Translate APIのAPIキーを発行してください。""のままだと翻訳機能なしで動作します。
+
+`GOOGLE_CLOUD_TRANSLATION_API_KEY = ""`
+
 ### firebase adminへのアクセス
 
 firebase adminはサービス アカウントで発行した秘密鍵情報のjsonファイルをダウンロードして入力してください。
