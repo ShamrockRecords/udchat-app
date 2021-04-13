@@ -35,8 +35,6 @@ FIREBASE_ADMINSDK_client_x509_cert_url = ""
 
 firebase adminとfirestoreの初期化で使用する値を環境変数にいれます。
 
-firebase adminはjsonファイルでダウンロードしたもの開いて
-
 ```
 FIREBASE_ADMINSDK_type = ""
 FIREBASE_ADMINSDK_project_id = ""
@@ -51,7 +49,25 @@ FIREBASE_ADMINSDK_client_x509_cert_url = ""
 ```
 に入力。
 
-firestoreは発行されたコードの中身を
+firestoreへのアクセス用に発行されたコードを環境変数に移してください。
+
+```
+var firebaseConfig = {
+    apiKey: "xxxxx,
+    authDomain: "xxxxx",
+    projectId: "xxxxx",
+    storageBucket: "xxxxx",
+    messagingSenderId: "xxxxx",
+    appId: "xxxxx",
+    measurementId: "xxxxx"
+  };
+  
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+```
+
+firebase adminはサービス アカウントで発行する秘密鍵情報のjsonファイルをダウンロードして
 
 ```
 FIREBAE_API_KEY = ""
@@ -62,7 +78,7 @@ FIREBASE_MESSAGING_SENDER_ID = ""
 FIREBASE_APP_ID = ""
 MEASUREMENT_ID = ""
 ```
-に入力。
+に入力してください。
 
 `ROOT_URL = "http://localhost:3000"`
 
