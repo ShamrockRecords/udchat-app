@@ -73,7 +73,7 @@ app.use('/locale_change', localeChangeRouter);
 app.use('/about', aboutRouter);
 
 var firebaseConfig = {
-  apiKey: process.env.FIREBAE_API_KEY,
+  apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
   projectId: process.env.FIREBASE_PROJECT_ID,
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,

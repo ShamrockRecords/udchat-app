@@ -12,7 +12,7 @@ git clone後のフォルダで実行します。
 ```
 ROOT_URL = "http://localhost:3000"
 
-FIREBAE_API_KEY = ""
+FIREBASE_API_KEY = ""
 FIREBASE_AUTH_DOMAIN = ""
 FIREBASE_PROJECT_ID = ""
 FIREBASE_STORAGE_BUCKET = ""
@@ -54,7 +54,7 @@ var firebaseConfig = {
 ```
 このコードのxxxxxを
 ```
-FIREBAE_API_KEY = "xxxxx"
+FIREBASE_API_KEY = "xxxxx"
 FIREBASE_AUTH_DOMAIN = "xxxxx"
 FIREBASE_PROJECT_ID = "xxxxx"
 FIREBASE_STORAGE_BUCKET = "xxxxx"
