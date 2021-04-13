@@ -1,12 +1,3 @@
-
-function addMember(uid) {
-    fetch('/user/add?uid=' + uid)
-    .then(response => response.json())
-    .then(data => {
-        alert(data["resultMessage"]) ;
-    });
-}
-
 function getDateString(timestamp) {
     let date = new Date(timestamp) ;
     return date.toLocaleString('ja-JP') ;
