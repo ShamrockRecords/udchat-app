@@ -61,6 +61,7 @@ FIREBASE_MESSAGING_SENDER_ID = "xxxxx"
 FIREBASE_APP_ID = "xxxxx"
 MEASUREMENT_ID = "xxxxx"
 ```
+ローカルで動作させるとfirestoreのインデックスを作成するアラートがでるのでエラーメッセージのURLから作成してください。
 
 ### Google Translate APIへのアクセス
 
@@ -71,6 +72,7 @@ Google CloudコンソールでGoogle Translate APIのAPIキーを発行してく
 ### firebase adminへのアクセス
 
 firebase adminはサービス アカウントで発行した秘密鍵情報のjsonファイルをダウンロードして入力してください。
+AuthenticationのSign-in methodで「メール／パスワード」を有効にしてください。
 
 ```
 FIREBASE_ADMINSDK_type = ""
