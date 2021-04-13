@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<title><%- __("UD Chat") %> - <%= title %></title>
+		<%- include('parts/head', {}) %>
+		<script src="/socket.io/socket.io.js"></script>
+
+		<style>
+			.top {
+				overflow-y: scroll;
+			}
+
+			.bottom {
+				padding:0;
+			}
+
+			html,
+			body,
+			#main 
+			{
+				padding:0;
+    			margin:0;
+				height:100%;
+				background-color:ghostwhite;
+			}
+
+			.right {
+				display:table; 
+				margin-left: auto;			
+			}
+
+			.left {
+				display:table;
+			}
+
+			a {
+				color:royalblue ;
+			}
+
+			.name {
+				font-size:smaller; 
+			}
+
+			.messageRight {
+				background-color: yellowgreen;
+			}
+
+			.messageLeft {
+				background-color:white;
+			}
+
+			.translation {
+				color: white;
+				background-color:mediumblue;
+			}
+
+			#notification {
+				z-index: 2;
+				position: absolute; 
+				background-color:gray;
+				color: white;
+			}
+		</style>
+		<script src="../javascripts/language_support.js"></script>
+	</head>
+	<body class="p-3">
+		<script>
+			let socket = io();
+			let isBottom = true ;
+
+			// When message came.
+			socket.on('message', async (message) => {
+				let commands = JSON.parse(message) ;
+				
+				for (let key in commands) {
+					let command = commands[key] ;
+					let timestamp = command.timestamp ;
+					let message = command.message ;
+
+					if (command.method == 'requestConnecting') {
+						socket.send(JSON.stringify({
+							requestId: "<%= requestId %>",
+							uid: "<%= uid %>",
+							name: "<%= name %>",
+							language: $('#inputLanguages option:selected').val(),
+							message: "<%= name %>" + '<%- __("が参加しました。") %>',
+							method: 'information',
+						})) ;
+
+						continue ;
+					}
+
+					message = message.replace("\n", "<br />") ;
+					message = message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank">$1</a> ')
+
+					let element = $('<div class="p-3" style="width: 100%;">') ;
+					
+					if ("<%= uid %>" == command.uid) {
+						element.append($('<div class="right name px-2 my-1">').text(getDateString(timestamp))) ;
+
+						if (command.method == 'information') {
+							element.append($('<div class="right px-4 py-2 small">').html(message)) ;
+						} else {
+							element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(message)) ;
+						}
+					} else {
+						element.append($('<div class="left name px-2 my-1">').text(command.name + " " + getDateString(timestamp))) ;
+
+						if (command.method == 'information') {
+							element.append($('<div class="left px-4 py-2 small">').html(message)) ;
+						} else {
+							element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(message)) ;
+						}
+
+						let translation = "" ;
+						 
+						if (command.language != undefined) {
+							await translate("<%= apiKey %>", message, command.language, $('#languages option:selected').val(), (t, from) => {
+								translation = t ;
+								command.language = from ;
+							}) ;
+						}
+
+						if (translation != "" && command.language != $('#languages option:selected').val()) {
+							element.append($('<div class="left messageLeft rounded-pill translation px-4 py-2">').html(translation)) ;
+						}
+					}
+
+					$('#messages').append(element);
+				}
+				
+				if (isBottom || "<%= uid %>" == commands[commands.length-1].uid) {
+					$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
+					$('#notification').hide() ;
+				} else {
+					$('#notification').show() ;
+					$('#notification').offset({ 
+						top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
+						left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
+					});
+				}
+			});
+
+			// Window loaded.
+			$(window).on('load', async function() {
+				$('#messages').scroll(() => {
+					let clientHeight = $('#messages').get(0).clientHeight ;
+					let scrollHeight = $('#messages').get(0).scrollHeight ;
+
+					if (scrollHeight - (clientHeight + $('#messages').scrollTop()) == 0) {
+    					isBottom = true ;
+						$('#notification').hide() ;
+  					} else {
+						isBottom = false ;
+					}
+				}) ;
+
+				function resize() {
+					$('#messages').height($('body').height() - $('#operation').height()) ;
+				}
+				
+				resize() ;
+
+				$(window).on('resize', function() {
+					resize() ;					
+				}) ;
+
+				$('#notification').hide() ;
+
+				let defaultLanguage = getDefaultLanguage() ;
+
+				let languages = await supportedLanguages("<%= apiKey %>") ;
+
+				if (localStorage.getItem('languages')) {
+					defaultLanguage = localStorage.getItem('languages') ;
+				}
+
+				for (let key in languages) {
+					let option = $('<option>') ;
+
+					option.attr("value", languages[key].language) ;
+
+					if (defaultLanguage == languages[key].language) {
+						option.prop('selected', true) ;
+					}
+
+					option.text(languages[key].name) ;
+
+					$('#languages').append(option) ;
+				}
+
+				let defaultInputLanguage = "" ;
+
+				if (localStorage.getItem('inputLanguages')) {
+					defaultInputLanguage = localStorage.getItem('inputLanguages') ;
+				}
+
+				{
+					let option = $('<option>') ;
+
+					option.attr("value", '') ;
+					option.text('<%- __("自動判別") %>') ;
+					$('#inputLanguages').append(option) ;
+
+					if (defaultInputLanguage == "") {
+						option.prop('selected', true) ;
+					}
+				}
+
+				for (let key in languages) {
+					let option = $('<option>') ;
+
+					option.attr("value", languages[key].language) ;
+
+					if (defaultInputLanguage == languages[key].language) {
+						option.prop('selected', true) ;
+					}
+
+					option.text(languages[key].name) ;
+
+					$('#inputLanguages').append(option) ;
+				}
+
+				$('#languages').change(() => {
+					localStorage.setItem('languages', $('#languages option:selected').val());
+				}) ;
+
+				$('#inputLanguages').change(() => {
+					localStorage.setItem('inputLanguages', $('#inputLanguages option:selected').val());
+				}) ;
+
+				socket.send(JSON.stringify({
+					requestId: "<%= requestId %>",
+					uid: "<%= uid %>",
+					name: "<%= name %>",
+					language: '',
+					message: '',
+					method:'requestConnecting',
+				})) ;
+			}) ;
+			
+			// keypress detected.
+			$(document).keypress(function(e) {
+				if (!event.shiftKey &&　((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13))) {
+					send() ;
+					e.preventDefault();
+				}
+			});
+
+			// functions.
+			function onClickNotification() {
+				$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
+				$('#notification').hide() ;
+			}
+
+			function send() {
+				let text = $('#message').val() ;
+
+				if (text != '') {
+
+					let selectedLanguage = $('#inputLanguages option:selected').val() ;
+
+					if (selectedLanguage == '') {
+						detect("<%= apiKey %>", text, (language) => {
+							selectedLanguage = language ;
+						}) ;
+					}
+
+					socket.send(JSON.stringify({
+						requestId: "<%= requestId %>",
+						uid: "<%= uid %>",
+						name: $('#displayName').val(),
+						language: selectedLanguage,
+						message: $('#message').val(),
+						method:'message',
+					})) ;
+
+					$('#message').val('') ;
+				}
+			}
+		</script>
+
+		<div id='main'>
+			<div class="top p-1" id="messages"></div>
+
+			<div class="rounded text-center p-1" onclick="onClickNotification()" id="notification"><%- __("新しいメッセージがあります") %></div>
+			
+			<div class="bottom p-1" id="operation">
+				<div class="row">
+					<div class="col">
+						<button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#sample"><%- __("設定を開く") %></button>
+					</div>
+					<div class="col">
+						<% if (isAlreadySignIn) { %>
+							<div class="text-right small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("UD Chatを開く") %></a></div>
+						<% } else { %>
+							<div class="text-right small"><%= title %> - <a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("UD Chatにサインイン") %></a></div>
+						<% } %>
+					</div>
+				</div>
+				<div id="sample" class="collapse">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="row">
+								<div class="col">
+									<div class="form-group">
+										<label class="small" for="name"><%- __("名前") %></label>
+										<input type="text" class="form-control" id="displayName" name="displayName" value="<%= name %>" maxlength="30">
+									</div>
+								</div>
+								<% if (apiKey != '') { %>
+								<div class="col">
+									<div class="form-group">
+										<label class="small" for="name"><%- __("表示言語") %></label>
+										<select class="form-control" id="languages" title="<%- __("翻訳して表示する言語を選択します。") %>"></select>
+									</div>
+								</div>
+								<div class="col">
+									<div class="form-group">
+										<label class="small" for="name"><%- __("入力言語") %></label>
+										<select class="form-control" id="inputLanguages" title="<%- __("自分が入力する言語を選択します。") %>"></select>
+									</div>
+								</div>
+								<% } %>
+							</div>
+						</div>
+					</div>
+				</div>
+				<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="" maxlength="200" aria-describedby="hint"></textarea>
+				<button class="form-control btn btn-primary my-1" onclick="send()"><%- __("送信") %></button>	
+				<div class="text-center my-1 small" id="hint"><%- __("Enterキーで送信 Shift+Enterで改行") %></div>
+			</div>
+		</div>
+	</body>
+</html>

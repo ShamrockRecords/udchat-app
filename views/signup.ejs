@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja" >
+    <head>
+        <title><%- __("UD Chat") %> - <%- __("サインアップ") %></title>
+        <%- include('parts/head', {}) %>
+        <link href="stylesheets/signin.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container text-center">
+            <%- include('parts/lang', {}) %>
+            <h1 class='h1'><%- __("UD Chat") %></h1>
+            <form class="form-signin" method="post" action="/signup">
+                <h1 class="h3 mb-3 font-weight-normal"><%- __("サインアップ") %></h1>
+                <label for="inputEmail" class="sr-only"><%- __("メールアドレス") %></label>
+                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="<%- __("メールアドレス") %>" required autofocus>
+                <label for="inputPassword" class="sr-only"><%- __("パスワード") %></label>
+                <input type="password" name="password" id="inputPassword" class="form-control" placeholder="<%- __("パスワード") %>" required>
+                <input type="hidden" name="chatId" value="<%= chatId %>">
+                <button class="btn btn-lg btn-primary btn-block" type="submit"><%- __("サインアップ") %></button>
+                <div class="my-3">
+                    <strong><%- __("サインアップ後に認証メールが届きます") %></strong>
+                </div>
+                <div class="my-3">
+                    <% if (chatId != '') { %>
+                        <a href="/signin?chatId=<%= chatId %>"><%- __("サインインに戻る") %></a>
+                    <% } else { %>
+                        <a href="/signin"><%- __("サインインに戻る") %></a>
+                    <% } %>
+                </div>
+                <% if (errorMessage != '') { %>
+                    <div class="alert alert-primary my-3" role="alert">
+                        <%= errorMessage %>
+                    </div>
+                <% } %>
+                <p class="my-3 text-muted"><%- __("Copyright UDトーク all right reserved.") %></p>
+            </form>
+        </div>
+    </body>
+</html>
+

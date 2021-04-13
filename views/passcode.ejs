@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<title><%- __("UD Chat") %> - <%- __("パスコード") %></title>
+		<%- include('parts/head', {}) %>
+	</head>
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light text-dark bg-dark">
+			<a class="navbar-brand text-white" href="/"><%- __("UD Chat") %></a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav">
+					<% if (!isAlreadySignIn) { %>
+						<li class="nav-item">	
+							<a class="nav-link text-white" href="/signin?chatId=<%= chatId %>"><%- __("サインイン") %></a>
+						</li>
+					<% } %>
+					<li class="nav-item">
+						<a class="nav-link text-white" href="/about"><%- __("ご利用について") %></a>
+					</li>
+				</ul>
+			</div>
+		</nav>
+		
+		<%- include('parts/lang', {}) %>
+
+		<div class="container p-3">
+			<form method="POST" action="/chat/passcode">
+				<div class="form-group">
+					<label for="passcode"><%- __("名前") %></label>
+					<input required type="text" maxlength="30" class="form-control" id="displayName" name="displayName" value="<%= displayName %>" aria-describedby="displayNameHelp">
+					<small id="displayNameHelp" class="form-text text-muted"><%- __("チャットに表示される名前を入力してください。サインインをするとプロフィールの名前になります。") %></small>
+				</div>
+				<% if (isNeedPasscode) { %>
+				<div class="form-group">
+					<label for="passcode"><%- __("パスコード") %></label>
+					<input required autocomplete="off" type="text" maxlength="30" class="form-control" id="passcode" name="passcode" value="" aria-describedby="passcodeHelp">
+					<small id="passcodeHelp" class="form-text text-muted"><%- __("パスコードを入力してください。") %></small>
+				</div>
+				<% } %>
+				<input type="hidden" name="chatId" value="<%= chatId %>">
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary"><%- __("入室") %></button>
+				</div>
+			</form>
+		</div>
+		<%- include('parts/footer', {}) %>
+	</body>
+</html>

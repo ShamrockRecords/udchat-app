@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<title><%- __("UD Chat") %> - <%- __("UD Chatについて") %></title>
+		<%- include('parts/head', {}) %>
+	</head>
+	<body>
+		<% if (isAlreadySignIn) { %>
+			<%- include('parts/nav_bar', {}) %>
+		<% } else { %>
+			<%- include('parts/nav_bar_before_signin', {}) %>
+		<% } %>
+
+		<div class="container p-1">
+			<h2><%- __("UD Chatについて") %></h2>
+
+			<div class="container p-3">
+				<%- __("簡単に誰でも参加できる自動翻訳機能付きグループチャットを作ることができます。") %>
+			</div>
+
+			<div class="container p-3">
+				<h3><%- __("解決できる課題") %></h3>
+				<%- __("explanation01") %><br />
+				<%- __("explanation02") %><br />
+				<%- __("explanation03") %><br />
+				<%- __("explanation04") %>
+			</div>
+
+			
+			<div class="container p-3">
+				<h3><%- __("注意事項") %></h3>
+				<ul>
+					<li><%- __("note01") %></li>
+					<li><%- __("note02") %></li>
+					<li><%- __("note03") %></li>
+					<li><%- __("note04") %></li>
+					<li><%- __("note05") %></li>
+					<li><%- __("note06") %></li>
+					<li><%- __("note07") %></li>
+				</ul>
+			</div>
+			<div class="container p-3">
+				<%- __("ご意見・ご要望は") %><a href="https://forms.gle/eVVfGmgBSsyLcUAw7" target="_blank">こちら</a><%- __("まで。") %>
+			</div>
+			<div class="container p-3">
+				<%- __("開発・企画：Code for Nerima 青木秀仁") %>
+			</div>
+		</div>
+		<%- include('parts/footer', {}) %>
+	</body>
+</html>

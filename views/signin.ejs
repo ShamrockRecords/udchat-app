@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja" >
+    <head>
+        <title><%- __("UD Chat") %> - <%- __("サインイン") %></title>
+        <%- include('parts/head', {}) %>
+        <link href="stylesheets/signin.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container text-center">
+            <div class="container p-2">
+                <%- include('parts/lang', {}) %>
+                <strong><%- __("自動翻訳機能付きグループチャット") %></strong>
+                <h1 class='h1'><%- __("UD Chat") %></h1>
+            </div>
+                <p><%- __("驚くほど簡単にグループチャットができます。") %></p>
+                <p><%- __("チャットを作ったらURLをコピーして送るだけ。") %></p>
+                <p><%- __("パスコードの設定もできるので安心！") %></p>
+                <p><%- __("UDはユニバーサルデザインで、誰でも簡単に使えることを目指しています。") %></p>
+            <form class="form-signin" method="post" action="/signin">
+                <h1 class="h3 mb-3 font-weight-normal"><%- __("サインイン") %></h1>
+                <label for="inputEmail" class="sr-only"><%- __("メールアドレス") %></label>
+                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="<%- __("メールアドレス") %>" required autofocus>
+                <label for="inputPassword" class="sr-only"><%- __("パスワード") %></label>
+                <input type="password" name="password" id="inputPassword" class="form-control" placeholder="<%- __("パスワード") %>" required>
+                <input type="hidden" name="chatId" value="<%= chatId %>">
+                <button class="btn btn-lg btn-primary btn-block" type="submit"><%- __("サインイン") %></button>
+                <div class="my-3">
+                    <a href="/reset_password"><%- __("パスワードを忘れた方はこちら") %></a>
+                </div>
+                <div class="my-3">
+                    <% if (chatId != '') { %>
+                        <a href="/signup?chatId=<%= chatId %>"><%- __("初めてサインインする方はこちら") %></a>
+                    <% } else { %>
+                        <a href="/signup"><%- __("初めてサインインする方はこちら") %></a>
+                    <% } %>
+                </div>
+                <% if (errorMessage != '') { %>
+                    <div class="alert alert-primary my-3" role="alert">
+                        <%= errorMessage %>
+                    </div>
+                <% } %>
+                <div class="alert alert-secondary p-3">
+                    <p><%- __("とりあえずベータ公開です。") %></p>
+                    <p><%- __("サーバー負荷とかコストの関係で予告なしに閉じるかもしれませんがご了承ください。") %></p>
+                </div>
+                <div class="container">
+                    <a href="/about"><%- __("ご利用について") %></a>
+                </div>
+                <p class="my-3 text-muted"><%- __("Copyright UDトーク all right reserved.") %></p>
+            </form>
+        </div>
+    </body>
+</html>
+

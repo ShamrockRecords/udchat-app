@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+  	<head>
+		<title><%- __("UD Chat") %> - <%- __("トップページ") %></title>
+    	<%- include('parts/head', {}) %>
+  	</head>
+	  <script>
+		  function copyToClipboard(id) {
+			// コピー対象をJavaScript上で変数として定義する
+			var copyTarget = document.getElementById(id);
+			// コピー対象のテキストを選択する
+			copyTarget.select();
+			// 選択しているテキストをクリップボードにコピーする
+			document.execCommand("Copy");
+			// コピーをお知らせする
+			alert('<%- __("クリップボードにコピーしました。 ") %>');
+		}
+	  </script>
+	  <style>
+		  #command {
+			width: 80px;
+		  }
+	  </style>
+  	<body>
+		<%- include('parts/nav_bar', {}) %>
+		<div class="container p-3">
+			<% if (errorMessage == ''){ %>
+			<div class="row">
+				<div class="col p-3">
+					<h1><%- __("ようこそ") %> <%= name %> <%- __("さん") %></h1>
+				</div>
+			</div>
+			<% } else { %>
+			<div class="row">
+				<div class="col p-3">
+					<div class="alert alert-danger" role="alert"><%= errorMessage %></div>
+				</div>
+			</div>
+			<% } %>
+		</div>
+		
+		<div class="container p-3">
+			<button class="btn btn-primary" onclick="location.href='/create'"><%- __("チャットを作成") %></button>
+		</div>
+
+		<div class="container p-3">
+			<table class="table">
+			<% for (let key in chats) { %>
+				<% let chat = chats[key] ; %>
+				<table class="table border p-3">
+					<tr>
+						<td class="h3"><strong><%= chat.name %></strong></td>
+
+						<% if (chat.passcode != undefined && chat.passcode != '') { %>
+							<td><%- __("パスコード：") %> <%= chat.passcode %></td>
+						<% } else { %>
+							<td></td>
+						<% } %>
+					</tr>
+					<tr>
+						<td class="text-right" colspan="2">
+							<button class="btn btn-primary" id="command" onclick="window.open('/chat?chatId=<%= chat.chatId %>', '_blank');"><%- __("開く") %></button>
+							<button class="btn btn-success" id="command" onclick="copyToClipboard('<%= chat.chatId %>')"><%- __("コピー") %></button>
+							<button class="btn btn-primary" id="command" onclick="location.href='/create?chatId=<%= chat.chatId %>'"><%- __("編集") %></button>
+							<button class="btn btn-danger" id="command" onclick="location.href='/delete?chatId=<%= chat.chatId %>'"><%- __("削除") %></button>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<textarea id="<%= chat.chatId %>" style="resize: none; width: 100%" readonly><%= rootURL %>/chat?chatId=<%= chat.chatId %></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td class="small" colspan="2">
+							<%- __("URLをコピーしてチャットをしたい相手に送ったりサイトに掲載してください。") %>
+						</td>
+					</tr>
+				</table>
+			<% } %>
+			</table>
+		</div>
+	
+		<div class="container p-3"></div>
+		<%- include('parts/footer', {}) %>
+		</div>
+  	</body>
+</html>
