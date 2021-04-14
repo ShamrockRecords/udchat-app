@@ -42,6 +42,8 @@ class socketWrapper {
                             } catch(e) {
 
                             }
+
+                            command.needsTranslating = false ;
                             
                             commands.push(command) ;
                         }
@@ -71,6 +73,8 @@ class socketWrapper {
                 } catch(e) {
 
                 }
+
+                command.needsTranslating = true ;
 
                 io.to(command.requestId).emit("message", JSON.stringify([command])); 
             }) ;

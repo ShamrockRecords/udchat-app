@@ -123,7 +123,7 @@
 
 						let translation = "" ;
 						 
-						if (command.language != undefined) {
+						if (command.language != undefined && command.needsTranslating) {
 							await translate("<%= apiKey %>", message, command.language, $('#languages option:selected').val(), (t, from) => {
 								translation = t ;
 								command.language = from ;
