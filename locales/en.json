@@ -1,7 +1,7 @@
 {
 	"設定を開く": "Open Settings",
 	"名前": "Your Name",
-	"表示言語": "Translate Language",
+	"翻訳言語": "Translate Language",
 	"入力言語": "Input Language",
 	"自動判別": "Automatic",
 	"が参加しました。": " joined.",
@@ -78,7 +78,7 @@
 	"チャットに表示される名前を入力してください。サインインをするとプロフィールの名前になります。": "Input your displayed name at this chat. If you sign in, profile's name is used.",
 	"翻訳して表示する言語を選択します。": "You can select translation language.",
 	"自分が入力する言語を選択します。": "You can select your input language if you want to set except automatic detection.",
-	"再翻訳しない": "None",
-	"再翻訳して結果を確認する言語を選択します。": "You can select reverse translation language.",
-	"再翻訳言語": "Re-translation language"
+	"なし": "None",
+	"再翻訳して翻訳結果を確認する言語を選択します。": "You can select reverse translation language.",
+	"再翻訳言語": "Re-translate language"
 }
