@@ -69,6 +69,7 @@ MEASUREMENT_ID = "xxxxx"
 ### Google Translate APIへのアクセス
 
 Google CloudコンソールでGoogle Translate APIのAPIキーを発行してください。""のままだと翻訳機能なしで動作します。
+APIキーには必ずHTTPリファラーで制限をかけてください。
 
 `GOOGLE_CLOUD_TRANSLATION_API_KEY = ""`
 

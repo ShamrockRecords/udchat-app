@@ -35,7 +35,7 @@ async function translate(apiKey, message, from, to, completion) {
         URL += "&target=" + to + "&q=" + message;
     
         let data = await fetch(URL).then(response => response.json()) ;
-
+       
         try {
             completion(data.data.translations[0].translatedText, data.data.translations[0].detectedSourceLanguage) ;
         } catch (e) {

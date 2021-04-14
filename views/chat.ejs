@@ -54,6 +54,10 @@
 				background-color:mediumblue;
 			}
 
+			.reversetTranslation {
+				background-color:white;
+			}
+			
 			#notification {
 				z-index: 2;
 				position: absolute; 
@@ -102,6 +106,11 @@
 							element.append($('<div class="right px-4 py-2 small">').html(message)) ;
 						} else {
 							element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(message)) ;
+						
+							if ((command.translation != undefined && command.translation != '') && 
+								(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
+								element.append($('<div class="right messageRight rounded-pill reversetTranslation px-4 py-2">').html('<span style="font-size: small;">' + command.translation + '</span>' + '<br />' + command.reverseTranslation)) ;
+							}
 						}
 					} else {
 						element.append($('<div class="left name px-2 my-1">').text(command.name + " " + getDateString(timestamp))) ;
@@ -167,67 +176,49 @@
 
 				$('#notification').hide() ;
 
-				let defaultLanguage = getDefaultLanguage() ;
-
 				let languages = await supportedLanguages("<%= apiKey %>") ;
+				
+				function initLauguageSelect(tag, defaultOption, languages) {
+					let defaultLanguage = '' ;
 
-				if (localStorage.getItem('languages')) {
-					defaultLanguage = localStorage.getItem('languages') ;
-				}
-
-				for (let key in languages) {
-					let option = $('<option>') ;
-
-					option.attr("value", languages[key].language) ;
-
-					if (defaultLanguage == languages[key].language) {
-						option.prop('selected', true) ;
+					if (localStorage.getItem(tag)) {
+						defaultLanguage = localStorage.getItem(tag) ;
 					}
 
-					option.text(languages[key].name) ;
+					if (defaultOption != '') {
+						let option = $('<option>') ;
 
-					$('#languages').append(option) ;
-				}
+						option.attr("value", '') ;
+						option.text(defaultOption) ;
+						$('#' + tag).append(option) ;
 
-				let defaultInputLanguage = "" ;
-
-				if (localStorage.getItem('inputLanguages')) {
-					defaultInputLanguage = localStorage.getItem('inputLanguages') ;
-				}
-
-				{
-					let option = $('<option>') ;
-
-					option.attr("value", '') ;
-					option.text('<%- __("自動判別") %>') ;
-					$('#inputLanguages').append(option) ;
-
-					if (defaultInputLanguage == "") {
-						option.prop('selected', true) ;
-					}
-				}
-
-				for (let key in languages) {
-					let option = $('<option>') ;
-
-					option.attr("value", languages[key].language) ;
-
-					if (defaultInputLanguage == languages[key].language) {
-						option.prop('selected', true) ;
+						if (defaultLanguage == "") {
+							option.prop('selected', true) ;
+						}
 					}
 
-					option.text(languages[key].name) ;
+					for (let key in languages) {
+						let option = $('<option>') ;
 
-					$('#inputLanguages').append(option) ;
+						option.attr("value", languages[key].language) ;
+
+						if (defaultLanguage == languages[key].language) {
+							option.prop('selected', true) ;
+						}
+
+						option.text(languages[key].name) ;
+
+						$('#' +tag).append(option) ;
+					}
+
+					$('#' +tag).change(() => {
+						localStorage.setItem(tag, $('#' +tag + ' option:selected').val());
+					}) ;
 				}
 
-				$('#languages').change(() => {
-					localStorage.setItem('languages', $('#languages option:selected').val());
-				}) ;
-
-				$('#inputLanguages').change(() => {
-					localStorage.setItem('inputLanguages', $('#inputLanguages option:selected').val());
-				}) ;
+				initLauguageSelect('languages', '', languages) ;
+				initLauguageSelect('inputLanguages', '<%- __("自動判別") %>', languages) ;
+				initLauguageSelect('reverseTranslationLanguages', '<%- __("再翻訳しない") %>', languages) ;
 
 				socket.send(JSON.stringify({
 					requestId: "<%= requestId %>",
@@ -253,16 +244,32 @@
 				$('#notification').hide() ;
 			}
 
-			function send() {
+			async function send() {
 				let text = $('#message').val() ;
 
 				if (text != '') {
+					let selectedInputLanguage = $('#inputLanguages option:selected').val() ;
 
-					let selectedLanguage = $('#inputLanguages option:selected').val() ;
+					if (selectedInputLanguage == '') {
+						await detect("<%= apiKey %>", text, (language) => {
+							selectedInputLanguage = language ;
+						}) ;
+					}
 
-					if (selectedLanguage == '') {
-						detect("<%= apiKey %>", text, (language) => {
-							selectedLanguage = language ;
+					let selectedReverseTranslationLanguage = $('#reverseTranslationLanguages option:selected').val() ;
+					let translation = '' ;
+					let reverseTranslation = '' ;
+
+					if (selectedReverseTranslationLanguage != '') {
+						console.log(selectedInputLanguage) ;
+						console.log(selectedReverseTranslationLanguage) ;
+
+						await translate("<%= apiKey %>", text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
+							translation = t ;
+						}) ;
+
+						await translate("<%= apiKey %>", translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
+							reverseTranslation = t ;
 						}) ;
 					}
 
@@ -270,9 +277,12 @@
 						requestId: "<%= requestId %>",
 						uid: "<%= uid %>",
 						name: $('#displayName').val(),
-						language: selectedLanguage,
+						language: selectedInputLanguage,
 						message: $('#message').val(),
 						method:'message',
+						translation: translation,
+						translationLanguage: selectedReverseTranslationLanguage,
+						reverseTranslation: reverseTranslation,
 					})) ;
 
 					$('#message').val('') ;
@@ -322,6 +332,18 @@
 									</div>
 								</div>
 								<% } %>
+							</div>
+						</div>
+						<div class="panel-body">
+							<div class="row">
+								<div class="col">
+									<div class="form-group">
+										<label class="small" for="name"><%- __("再翻訳言語") %></label>
+										<select class="form-control" id="reverseTranslationLanguages" title="<%- __("再翻訳して結果を確認する言語を選択します。") %>"></select>
+									</div>
+								</div>
+								<div class="col"></div>
+								<div class="col"></div>
 							</div>
 						</div>
 					</div>
