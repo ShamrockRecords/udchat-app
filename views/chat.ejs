@@ -246,6 +246,10 @@
 						$('#notification').hide() ;
 					}, 500);
 				}) ;
+
+				$('#sendButton').on('click', () => {
+					send() ;
+				}) ;
 			}) ;
 			
 			// keypress detected.
@@ -256,6 +260,7 @@
 				}
 			}) ;
 
+			// send message
 			async function send() {
 				let text = $('#message').val() ;
 
@@ -362,7 +367,7 @@
 					</div>
 				</div>
 				<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="" maxlength="200" aria-describedby="hint"></textarea>
-				<button class="form-control btn btn-primary my-1" onclick="send()"><%- __("送信") %></button>	
+				<button class="form-control btn btn-primary my-1" id="sendButton"><%- __("送信") %></button>	
 				<div class="text-center my-1 small" id="hint"><%- __("Enterキーで送信 Shift+Enterで改行") %></div>
 			</div>
 		</div>
