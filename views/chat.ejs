@@ -234,6 +234,10 @@
 					$('#languages').val(getDefaultLanguage()) ;
 					$('#inputLanguages').val('') ;
 					$('#reverseTranslationLanguages').val('') ;
+
+					localStorage.setItem('languages', $('#languages' + ' option:selected').val());
+					localStorage.setItem('inputLanguages', $('#inputLanguages' + ' option:selected').val());
+					localStorage.setItem('reverseTranslationLanguages', $('#reverseTranslationLanguages' + ' option:selected').val());
 				}) ;
 
 				$('#notification').on('click', () => {
