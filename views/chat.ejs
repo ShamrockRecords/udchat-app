@@ -247,6 +247,8 @@
 			async function send() {
 				let text = $('#message').val() ;
 
+				$('#message').val('') ;
+
 				if (text != '') {
 					let selectedInputLanguage = $('#inputLanguages option:selected').val() ;
 
@@ -277,14 +279,12 @@
 						uid: "<%= uid %>",
 						name: $('#displayName').val(),
 						language: selectedInputLanguage,
-						message: $('#message').val(),
+						message: text,
 						method:'message',
 						translation: translation,
 						translationLanguage: selectedReverseTranslationLanguage,
 						reverseTranslation: reverseTranslation,
 					})) ;
-
-					$('#message').val('') ;
 				}
 			}
 		</script>
