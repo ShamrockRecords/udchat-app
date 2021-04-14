@@ -70,6 +70,7 @@ You might have some error messages in local running form firebase. In this case,
 ### Accessing to Google Translate API
 
 Publish API key from Google Cloud console. If this key is empty, UD Chat can run without translation feature.
+You must attach HTTP Referrer limitations to API key.
 
 `GOOGLE_CLOUD_TRANSLATION_API_KEY = ""`
 
