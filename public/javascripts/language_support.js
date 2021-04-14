@@ -7,7 +7,7 @@ async function detect(apiKey, message, completion) {
 
     let URL = "https://translation.googleapis.com/language/translate/v2/detect?key=" + apiKey ;
     
-    URL += "&q=" + escape(message);;
+    URL += "&q=" + encodeURIComponent(message) ;
 
     let data = await fetch(URL).then(response => response.json()) ;
 
@@ -32,7 +32,7 @@ async function translate(apiKey, message, from, to, completion) {
             URL += "&source=" + from ;
         }
         
-        URL += "&target=" + to + "&q=" + escape(message);
+        URL += "&target=" + to + "&q=" + encodeURIComponent(message) ;
     
         let data = await fetch(URL).then(response => response.json()) ;
        
