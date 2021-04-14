@@ -341,34 +341,34 @@
 									</div>
 								</div>
 								<% if (apiKey != '') { %>
-								<div class="col">
-									<div class="form-group">
-										<label class="small" for="name"><%- __("翻訳言語") %></label>
-										<select class="form-control" id="languages" title="<%- __("翻訳して表示する言語を選択します。") %>"></select>
+									<div class="col">
+										<div class="form-group">
+											<label class="small" for="name"><%- __("翻訳言語") %></label>
+											<select class="form-control" id="languages" title="<%- __("翻訳して表示する言語を選択します。") %>"></select>
+										</div>
 									</div>
-								</div>
-								<div class="col">
-									<div class="form-group">
-										<label class="small" for="name"><%- __("入力言語") %></label>
-										<select class="form-control" id="inputLanguages" title="<%- __("自分が入力する言語を選択します。") %>"></select>
+									<div class="col">
+										<div class="form-group">
+											<label class="small" for="name"><%- __("入力言語") %></label>
+											<select class="form-control" id="inputLanguages" title="<%- __("自分が入力する言語を選択します。") %>"></select>
+										</div>
 									</div>
-								</div>
 								<% } %>
 							</div>
-						</div>
-						<div class="panel-body">
-							<div class="row">
-								<div class="col">
-									<div class="form-group">
-										<label class="small" for="name"><%- __("再翻訳言語") %></label>
-										<select class="form-control" id="reverseTranslationLanguages" title="<%- __("再翻訳して翻訳結果を確認する言語を選択します。") %>"></select>
+							<% if (apiKey != '') { %>
+								<div class="row">
+									<div class="col">
+										<div class="form-group">
+											<label class="small" for="name"><%- __("再翻訳言語") %></label>
+											<select class="form-control" id="reverseTranslationLanguages" title="<%- __("再翻訳して翻訳結果を確認する言語を選択します。") %>"></select>
+										</div>
+									</div>
+									<div class="col"></div>
+									<div class="col align-self-center text-center">
+										<button class="btn btn-danger btn-sm" type="button" id="resetTranslationSettingsButton"><%- __("翻訳言語をリセット") %></button>
 									</div>
 								</div>
-								<div class="col"></div>
-								<div class="col align-self-center text-center">
-									<button class="btn btn-danger btn-sm" type="button" id="resetTranslationSettingsButton"><%- __("翻訳言語をリセット") %></button>
-								</div>
-							</div>
+							<% } %>
 						</div>
 					</div>
 				</div>
