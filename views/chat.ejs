@@ -233,6 +233,19 @@
 					$('#inputLanguages').val('') ;
 					$('#reverseTranslationLanguages').val('') ;
 				}) ;
+
+				$('#notification').on('click', () => {
+					$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
+					$('#notification').hide() ;
+				}) ;
+
+				$('#settingButton').on('click', () => {
+					setTimeout(() => {
+						resize() ;
+						$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
+						$('#notification').hide() ;
+					}, 500);
+				}) ;
 			}) ;
 			
 			// keypress detected.
@@ -241,13 +254,7 @@
 					send() ;
 					e.preventDefault();
 				}
-			});
-
-			// functions.
-			function onClickNotification() {
-				$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
-				$('#notification').hide() ;
-			}
+			}) ;
 
 			async function send() {
 				let text = $('#message').val() ;
@@ -297,14 +304,14 @@
 		<div id='main'>
 			<div class="top p-1" id="messages"></div>
 
-			<div class="rounded text-center p-1" onclick="onClickNotification()" id="notification"><%- __("新しいメッセージがあります") %></div>
+			<div class="rounded text-center p-1" id="notification"><%- __("新しいメッセージがあります") %></div>
 			
 			<div class="bottom p-1" id="operation">
 				<div class="row">
 					<div class="col-auto">
-						<button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#sample"><%- __("設定を開く") %></button>
+						<button class="btn btn-primary btn-sm" id="settingButton" type="button" data-toggle="collapse" data-target="#sample"><%- __("設定を開く") %></button>
 					</div>
-					<div class="col">
+					<div class="col align-self-center">
 						<% if (isAlreadySignIn) { %>
 							<div class="text-right small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("UD Chatを開く") %></a></div>
 						<% } else { %>
