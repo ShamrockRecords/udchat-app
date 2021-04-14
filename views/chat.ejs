@@ -178,9 +178,8 @@
 
 				let languages = await supportedLanguages("<%= apiKey %>") ;
 				
-				function initLauguageSelect(tag, defaultOption, languages) {
-					let defaultLanguage = '' ;
-
+				function initLauguageSelect(tag, defaultLanguage, defaultOption, languages) {
+					
 					if (localStorage.getItem(tag)) {
 						defaultLanguage = localStorage.getItem(tag) ;
 					}
@@ -216,9 +215,9 @@
 					}) ;
 				}
 
-				initLauguageSelect('languages', '', languages) ;
-				initLauguageSelect('inputLanguages', '<%- __("自動判別") %>', languages) ;
-				initLauguageSelect('reverseTranslationLanguages', '<%- __("なし") %>', languages) ;
+				initLauguageSelect('languages', getDefaultLanguage(), '', languages) ;
+				initLauguageSelect('inputLanguages', '', '<%- __("自動判別") %>', languages) ;
+				initLauguageSelect('reverseTranslationLanguages', '', '<%- __("なし") %>', languages) ;
 
 				socket.send(JSON.stringify({
 					requestId: "<%= requestId %>",
@@ -228,6 +227,12 @@
 					message: '',
 					method:'requestConnecting',
 				})) ;
+
+				$('#resetTranslationSettingsButton').on('click', () => {
+					$('#languages').val(getDefaultLanguage()) ;
+					$('#inputLanguages').val('') ;
+					$('#reverseTranslationLanguages').val('') ;
+				}) ;
 			}) ;
 			
 			// keypress detected.
@@ -296,7 +301,7 @@
 			
 			<div class="bottom p-1" id="operation">
 				<div class="row">
-					<div class="col">
+					<div class="col-auto">
 						<button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#sample"><%- __("設定を開く") %></button>
 					</div>
 					<div class="col">
@@ -342,7 +347,9 @@
 									</div>
 								</div>
 								<div class="col"></div>
-								<div class="col"></div>
+								<div class="col align-self-center text-center">
+									<button class="btn btn-danger btn-sm" type="button" id="resetTranslationSettingsButton"><%- __("翻訳言語をリセット") %></button>
+								</div>
 							</div>
 						</div>
 					</div>
