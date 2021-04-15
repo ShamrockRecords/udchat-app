@@ -310,15 +310,15 @@
 					send() ;
 				}) ;
 
-				$(document).on('visibilitychange', () => {
-					if (document.visibilityState === 'visible') {
-						becameBackground = false ;
-					}
+				$(window).on('focus', () => {
+					becameBackground = false ;
+					console.log('focus')
+				}) ;
 
-					if (document.visibilityState === 'hidden') {
-						becameBackground = true ;
-					}
-				})
+				$(window).on('blur', () => {
+					becameBackground = true ;
+					console.log('blur')
+				}) ;
 			}) ;
 			
 			// keypress detected.
@@ -415,9 +415,7 @@
 									<div class='col align-self-center text-center'>
 										<button class="js-modal-close btn btn-danger"><%- __("閉じる") %></button>
 									</div>
-								</div>
-								
-								
+								</div>								
 							</div><!--modal__inner-->
 						</div><!--modal-->
 					</div>
