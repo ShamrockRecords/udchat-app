@@ -100,6 +100,19 @@
 			let isBottom = true ;
 			let becameBackground = false ;
 
+			function escapeHTML(string){
+				return string.replace(/\&/g, '&amp;')
+				.replace(/\</g, '&lt;')
+				.replace(/\>/g, '&gt;')
+				.replace(/\"/g, '&quot;')
+				.replace(/\'/g, '&#x27');
+			}
+
+			function unescapeHTML(escapedHtml) {
+				const doc = new DOMParser().parseFromString(escapedHtml, 'text/html');
+				return doc.documentElement.textContent;
+			}
+
 			// When message came.
 			socket.on('message', async (message) => {
 				let commands = JSON.parse(message) ;
@@ -107,23 +120,39 @@
 				for (let key in commands) {
 					let command = commands[key] ;
 					let timestamp = command.timestamp ;
-					let message = command.message ;
 
 					if (command.method == 'requestConnecting') {
-						socket.send(JSON.stringify({
+						let command = {
 							requestId: "<%= requestId %>",
 							uid: "<%= uid %>",
 							name: "<%= name %>",
 							language: $('#inputLanguages option:selected').val(),
 							message: "<%= name %>" + '<%- __("が参加しました。") %>',
 							method: 'information',
-						})) ;
+						} ;
+
+						command.name = unescapeHTML(command.name) ;
+						command.message = unescapeHTML(command.message) ;
+
+						socket.send(JSON.stringify(command)) ;
 
 						continue ;
 					}
 
-					message = message.replace("\n", "<br />") ;
-					message = message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank">$1</a> ')
+					// escape
+					command.name = escapeHTML(command.name) ;
+					command.message = escapeHTML(command.message) ;
+
+					if (command.translation != undefined) {
+						command.translation = escapeHTML(command.translation) ;
+					}
+
+					if (command.reverseTranslation != undefined) {
+						command.reverseTranslation = escapeHTML(command.reverseTranslation) ;
+					}
+
+					command.message = command.message.replace("\n", "<br />") ;
+					command.message = command.message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank">$1</a> ')
 
 					let element = $('<div class="p-3" style="width: 100%;">') ;
 					
@@ -131,9 +160,9 @@
 						element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
 
 						if (command.method == 'information') {
-							element.append($('<div class="right px-4 py-2 small">').html(message)) ;
+							element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
 						} else {
-							element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(message)) ;
+							element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(command.message)) ;
 						
 							if ((command.translation != undefined && command.translation != '') && 
 								(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
@@ -144,15 +173,15 @@
 						element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
 
 						if (command.method == 'information') {
-							element.append($('<div class="left px-4 py-2 small">').html(message)) ;
+							element.append($('<div class="left px-4 py-2 small">').html(command.message)) ;
 						} else {
-							element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(message)) ;
+							element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(command.message)) ;
 						}
 
 						let translation = "" ;
 						 
 						if (command.language != undefined && command.needsTranslating) {
-							await translate("<%= apiKey %>", message, command.language, $('#languages option:selected').val(), (t, from) => {
+							await translate("<%= apiKey %>", command.message, command.language, $('#languages option:selected').val(), (t, from) => {
 								translation = t ;
 								if (from != undefined) {
 									command.language = from ;
