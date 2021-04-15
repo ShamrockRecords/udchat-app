@@ -1,10 +1,12 @@
 <!doctype html>
 <html lang="ja">
 	<head>
-		<title><%- __("UD Chat") %> - <%= title %></title>
+		<title><%- __("APP_NAME") %> - <%= title %></title>
 		<%- include('parts/head', {}) %>
 		<script src="/socket.io/socket.io.js"></script>
 
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"></script>
+		
 		<style>
 			.top {
 				overflow-y: scroll;
@@ -64,6 +66,31 @@
 				background-color:gray;
 				color: white;
 			}
+
+			.modal{
+				display: none;
+				height: 100vh;
+				position: fixed;
+				top: 0;
+				width: 100%;
+			}
+
+			.modal__bg{
+				background: rgba(0,0,0,0.8);
+				height: 100vh;
+				position: absolute;
+				width: 100%;
+			}
+
+			.modal__content{
+				background: #fff;
+				left: 50%;
+				position: absolute;
+				top: 50%;
+				transform: translate(-50%,-50%);
+				width: 300px;
+				height: 400px;
+			}
 		</style>
 		<script src="../javascripts/language_support.js"></script>
 	</head>
@@ -71,6 +98,20 @@
 		<script>
 			let socket = io();
 			let isBottom = true ;
+			let becameBackground = false ;
+
+			function escapeHTML(string){
+				return string.replace(/\&/g, '&amp;')
+				.replace(/\</g, '&lt;')
+				.replace(/\>/g, '&gt;')
+				.replace(/\"/g, '&quot;')
+				.replace(/\'/g, '&#x27');
+			}
+
+			function unescapeHTML(escapedHtml) {
+				const doc = new DOMParser().parseFromString(escapedHtml, 'text/html');
+				return doc.documentElement.textContent;
+			}
 
 			// When message came.
 			socket.on('message', async (message) => {
@@ -79,33 +120,49 @@
 				for (let key in commands) {
 					let command = commands[key] ;
 					let timestamp = command.timestamp ;
-					let message = command.message ;
 
 					if (command.method == 'requestConnecting') {
-						socket.send(JSON.stringify({
+						let command = {
 							requestId: "<%= requestId %>",
 							uid: "<%= uid %>",
 							name: "<%= name %>",
 							language: $('#inputLanguages option:selected').val(),
 							message: "<%= name %>" + '<%- __("が参加しました。") %>',
 							method: 'information',
-						})) ;
+						} ;
+
+						command.name = unescapeHTML(command.name) ;
+						command.message = unescapeHTML(command.message) ;
+
+						socket.send(JSON.stringify(command)) ;
 
 						continue ;
 					}
 
-					message = message.replace("\n", "<br />") ;
-					message = message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank">$1</a> ')
+					// escape
+					command.name = escapeHTML(command.name) ;
+					command.message = escapeHTML(command.message) ;
+
+					if (command.translation != undefined) {
+						command.translation = escapeHTML(command.translation) ;
+					}
+
+					if (command.reverseTranslation != undefined) {
+						command.reverseTranslation = escapeHTML(command.reverseTranslation) ;
+					}
+
+					command.message = command.message.replace("\n", "<br />") ;
+					command.message = command.message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank">$1</a> ')
 
 					let element = $('<div class="p-3" style="width: 100%;">') ;
 					
 					if ("<%= uid %>" == command.uid) {
-						element.append($('<div class="right name px-2 my-1">').text(getDateString(timestamp))) ;
+						element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
 
 						if (command.method == 'information') {
-							element.append($('<div class="right px-4 py-2 small">').html(message)) ;
+							element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
 						} else {
-							element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(message)) ;
+							element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(command.message)) ;
 						
 							if ((command.translation != undefined && command.translation != '') && 
 								(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
@@ -113,18 +170,18 @@
 							}
 						}
 					} else {
-						element.append($('<div class="left name px-2 my-1">').text(command.name + " " + getDateString(timestamp))) ;
+						element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
 
 						if (command.method == 'information') {
-							element.append($('<div class="left px-4 py-2 small">').html(message)) ;
+							element.append($('<div class="left px-4 py-2 small">').html(command.message)) ;
 						} else {
-							element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(message)) ;
+							element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(command.message)) ;
 						}
 
 						let translation = "" ;
 						 
 						if (command.language != undefined && command.needsTranslating) {
-							await translate("<%= apiKey %>", message, command.language, $('#languages option:selected').val(), (t, from) => {
+							await translate("<%= apiKey %>", command.message, command.language, $('#languages option:selected').val(), (t, from) => {
 								translation = t ;
 								if (from != undefined) {
 									command.language = from ;
@@ -140,10 +197,38 @@
 					$('#messages').append(element);
 				}
 				
-				if (isBottom || "<%= uid %>" == commands[commands.length-1].uid) {
+				function scrollToEnd() {
 					$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
 					$('#notification').hide() ;
+				}
+
+				function sendNewMessageNotification(message) {
+					console.log(message) ;
+
+					Push.create('<%- __("APP_NAME") %> - <%= title %>', {
+					　　body: message,
+					　　icon: '',
+					　　timeout: 10000,
+					　　onClick: function() {
+						　　scrollToEnd() ;
+							$(window).focus() ;
+        					this.close();
+					　　}
+					});
+				}
+
+				let lastCommand = commands[commands.length-1] ;
+
+				if (isBottom || "<%= uid %>" == lastCommand.uid) {
+					scrollToEnd() ;
+
+					if (becameBackground) {
+						sendNewMessageNotification(lastCommand.message) ;
+					}
 				} else {
+					
+					sendNewMessageNotification(lastCommand.message) ;
+
 					$('#notification').show() ;
 					$('#notification').offset({ 
 						top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
@@ -154,6 +239,9 @@
 
 			// Window loaded.
 			$(window).on('load', async function() {
+
+				Push.Permission.request();
+
 				$('#messages').scroll(() => {
 					let clientHeight = $('#messages').get(0).clientHeight ;
 					let scrollHeight = $('#messages').get(0).scrollHeight ;
@@ -256,6 +344,14 @@
 				$('#sendButton').on('click', () => {
 					send() ;
 				}) ;
+
+				$(window).on('focus', () => {
+					becameBackground = false ;
+				}) ;
+
+				$(window).on('blur', () => {
+					becameBackground = true ;
+				}) ;
 			}) ;
 			
 			// keypress detected.
@@ -289,11 +385,11 @@
 						selectedInputLanguage != selectedReverseTranslationLanguage) {
 				
 						await translate("<%= apiKey %>", text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
-							translation = t ;
+							translation = unescapeHTML(t) ;
 						}) ;
 
 						await translate("<%= apiKey %>", translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
-							reverseTranslation = t ;
+							reverseTranslation = unescapeHTML(t) ;
 						}) ;
 					}
 
@@ -310,6 +406,17 @@
 					})) ;
 				}
 			}
+
+			$(function(){
+				$('.js-modal-open').on('click',function(){
+					$('.js-modal').fadeIn();
+					return false;
+				});
+				$('.js-modal-close').on('click',function(){
+					$('.js-modal').fadeOut();
+					return false;
+				});	
+			});
 		</script>
 
 		<div id='main'>
@@ -322,11 +429,34 @@
 					<div class="col-auto">
 						<button class="btn btn-primary btn-sm" id="settingButton" type="button" data-toggle="collapse" data-target="#sample"><%- __("設定を開く") %></button>
 					</div>
+					<div class="col-auto p-0">
+						<button class="js-modal-open btn btn-info btn-sm" type="button"><%- __("バーコード") %></button>
+						<div class="modal js-modal">
+							<div class="modal__bg js-modal-close"></div>
+							<div class="modal__content py-3">
+								<div class='row'>
+									<div class='col align-self-center text-center'>
+										<strong><%= title %></strong>
+									</div>
+								</div>
+								<div class='row'>
+									<div class='col align-self-center text-center'>
+										<img src="https://chart.apis.google.com/chart?cht=qr&chs=300x300&chl=<%= rootURL %>/chat?chatId=<%= requestId %>" />
+									</div>
+								</div>
+								<div class='row'>
+									<div class='col align-self-center text-center'>
+										<button class="js-modal-close btn btn-danger"><%- __("閉じる") %></button>
+									</div>
+								</div>								
+							</div><!--modal__inner-->
+						</div><!--modal-->
+					</div>
 					<div class="col align-self-center">
 						<% if (isAlreadySignIn) { %>
-							<div class="text-right small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("UD Chatを開く") %></a></div>
+							<div class="text-right small"><%= title %><br /><a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
 						<% } else { %>
-							<div class="text-right small"><%= title %> - <a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("UD Chatにサインイン") %></a></div>
+							<div class="text-right small"><%= title %><br /><a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
 						<% } %>
 					</div>
 				</div>

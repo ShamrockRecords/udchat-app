@@ -10,14 +10,6 @@ class socketWrapper {
         this.socketsInstances = {} ;
     }
 
-    escapeHTML(string){
-        return string.replace(/\&/g, '&amp;')
-          .replace(/\</g, '&lt;')
-          .replace(/\>/g, '&gt;')
-          .replace(/\"/g, '&quot;')
-          .replace(/\'/g, '&#x27');
-      }
-
     init(server) {
         const io = require('socket.io')(server);
 
@@ -34,8 +26,6 @@ class socketWrapper {
                         for (let key in snapshot.docs) {
                             let doc = snapshot.docs[key] ;
                             let command = doc.data() ;
-
-                            command.message = this.escapeHTML(command.message) ;
 
                             try {
                                 command.timestamp = command.timestamp.toDate().toUTCString() ;
@@ -65,8 +55,6 @@ class socketWrapper {
                 command["timestamp"] = new Date() ;
 
                 await admin.firestore().collection("chat").doc(command.requestId).collection("messages").doc(command.messageId).set(command) ;
-
-                command.message = this.escapeHTML(command.message) ;
 
                 try {
                     command.timestamp = command.timestamp.toDate().toUTCString() ;
