@@ -385,11 +385,11 @@
 						selectedInputLanguage != selectedReverseTranslationLanguage) {
 				
 						await translate("<%= apiKey %>", text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
-							translation = t ;
+							translation = unescapeHTML(t) ;
 						}) ;
 
 						await translate("<%= apiKey %>", translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
-							reverseTranslation = t ;
+							reverseTranslation = unescapeHTML(t) ;
 						}) ;
 					}
 
