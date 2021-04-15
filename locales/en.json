@@ -22,7 +22,6 @@
 	"編集": "Edit",
 	"削除": "Delete",
 	"URLをコピーしてチャットをしたい相手に送ったりサイトに掲載してください。": "Please send chat url to your members who you want to chat.",
-	"Copyright UDトーク all right reserved.": "Copyright UD Chat all right reserved.",
 	"メールアドレス": "Email address",
 	"更新": "Update",
 	"キャンセル": "Cancel",
@@ -81,5 +80,10 @@
 	"なし": "None",
 	"再翻訳して翻訳結果を確認する言語を選択します。": "You can select reverse translation language.",
 	"再翻訳言語": "Re-translate language",
-	"翻訳言語をリセット": "Reset Languages"
+	"翻訳言語をリセット": "Reset Languages",
+	"©︎ 2021 Shamrock Records, Inc": {
+		" CC BY 4": {
+			"0": "©︎ 2021 Shamrock Records, Inc. CC BY 4.0"
+		}
+	}
 }
