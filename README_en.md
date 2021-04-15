@@ -1,5 +1,9 @@
 # UDChat - Group text chat with automatic translation
 
+Official Site
+
+https://chat.udtalk.jp
+
 ## How to run
 1. npm install
 
