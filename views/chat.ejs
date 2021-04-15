@@ -128,7 +128,7 @@
 					let element = $('<div class="p-3" style="width: 100%;">') ;
 					
 					if ("<%= uid %>" == command.uid) {
-						element.append($('<div class="right name px-2 my-1">').text(getDateString(timestamp))) ;
+						element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
 
 						if (command.method == 'information') {
 							element.append($('<div class="right px-4 py-2 small">').html(message)) ;
@@ -141,7 +141,7 @@
 							}
 						}
 					} else {
-						element.append($('<div class="left name px-2 my-1">').text(command.name + " " + getDateString(timestamp))) ;
+						element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
 
 						if (command.method == 'information') {
 							element.append($('<div class="left px-4 py-2 small">').html(message)) ;

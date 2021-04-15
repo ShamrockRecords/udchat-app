@@ -11,3 +11,11 @@ function autoLink(str) {
  
     return str.replace(regexp_url, regexp_makeLink);
 }
+
+function escapeHTML(string){
+    return string.replace(/\&/g, '&amp;')
+      .replace(/\</g, '&lt;')
+      .replace(/\>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/\'/g, '&#x27');
+  }

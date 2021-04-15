@@ -35,7 +35,16 @@ class socketWrapper {
                             let doc = snapshot.docs[key] ;
                             let command = doc.data() ;
 
+                            command.name = this.escapeHTML(command.name) ;
                             command.message = this.escapeHTML(command.message) ;
+
+                            if (command.translation != undefined) {
+                                command.translation = this.escapeHTML(command.translation) ;
+                            }
+
+                            if (command.reverseTranslation != undefined) {
+                                command.reverseTranslation = this.escapeHTML(command.reverseTranslation) ;
+                            }
 
                             try {
                                 command.timestamp = command.timestamp.toDate().toUTCString() ;
