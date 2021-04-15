@@ -152,8 +152,7 @@
 					Push.create('<%- __("APP_NAME") %> - <%= title %>', {
 					　　body: '<%- __("新しいメッセージがあります") %>',
 					　　icon: '',
-					　　timeout: 8000, // 通知が消えるタイミング
-					　　vibrate: [100, 100, 100], // モバイル端末でのバイブレーション秒数
+					　　timeout: 10000,
 					　　onClick: function() {
 						　　scrollToEnd() ;
 					　　}
