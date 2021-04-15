@@ -203,18 +203,18 @@
 				}
 
 				function sendNewMessageNotification(message) {
-					console.log(message) ;
-
-					Push.create('<%- __("APP_NAME") %> - <%= title %>', {
-					　　body: message,
-					　　icon: '',
-					　　timeout: 10000,
-					　　onClick: function() {
-						　　scrollToEnd() ;
-							$(window).focus() ;
-        					this.close();
-					　　}
-					});
+					if (Push.Permission.has()) {
+						Push.create('<%- __("APP_NAME") %> - <%= title %>', {
+						　　body: message,
+						　　icon: '',
+						　　timeout: 10000,
+						　　onClick: function() {
+							　　scrollToEnd() ;
+								$(window).focus() ;
+								this.close();
+						　　}
+						});
+					}
 				}
 
 				let lastCommand = commands[commands.length-1] ;
@@ -239,6 +239,7 @@
 
 			// Window loaded.
 			$(window).on('load', async function() {
+				console.log('load') ;
 
 				Push.Permission.request();
 
