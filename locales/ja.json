@@ -86,5 +86,7 @@
 	},
 	"APP_NAME": "UD Chat",
 	"APP_NAME_OPEN": "UD Chatを開く",
-	"APP_NAME_SIGN_IN": "UD Chatにサインイン"
+	"APP_NAME_SIGN_IN": "UD Chatにサインイン",
+	"バーコード": "バーコード",
+	"閉じる": "閉じる"
 }
