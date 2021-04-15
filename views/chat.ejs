@@ -423,9 +423,9 @@
 					</div>
 					<div class="col align-self-center">
 						<% if (isAlreadySignIn) { %>
-							<div class="text-right small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
+							<div class="text-right small"><%= title %><br /><a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
 						<% } else { %>
-							<div class="text-right small"><%= title %> - <a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
+							<div class="text-right small"><%= title %><br /><a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
 						<% } %>
 					</div>
 				</div>
