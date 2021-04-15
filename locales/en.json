@@ -85,5 +85,8 @@
 		" CC BY 4": {
 			"0": "©︎ 2021 Shamrock Records, Inc. CC BY 4.0"
 		}
-	}
+	},
+	"APP_NAME": "UD Chat",
+	"APP_NAME_OPEN": "Open UD Chat",
+	"APP_NAME_SIGN_IN": "Sign In to UD Chat",
 }
