@@ -173,26 +173,32 @@
 					$('#notification').hide() ;
 				}
 
-				function sendNewMessageNotification() {
+				function sendNewMessageNotification(message) {
+					console.log(message) ;
+
 					Push.create('<%- __("APP_NAME") %> - <%= title %>', {
-					　　body: '<%- __("新しいメッセージがあります") %>',
+					　　body: message,
 					　　icon: '',
 					　　timeout: 10000,
 					　　onClick: function() {
 						　　scrollToEnd() ;
+							$(window).focus() ;
+        					this.close();
 					　　}
 					});
 				}
 
-				if (isBottom || "<%= uid %>" == commands[commands.length-1].uid) {
+				let lastCommand = commands[commands.length-1] ;
+
+				if (isBottom || "<%= uid %>" == lastCommand.uid) {
 					scrollToEnd() ;
 
 					if (becameBackground) {
-						sendNewMessageNotification() ;
+						sendNewMessageNotification(lastCommand.message) ;
 					}
 				} else {
 					
-					sendNewMessageNotification() ;
+					sendNewMessageNotification(lastCommand.message) ;
 
 					$('#notification').show() ;
 					$('#notification').offset({ 
@@ -312,12 +318,10 @@
 
 				$(window).on('focus', () => {
 					becameBackground = false ;
-					console.log('focus')
 				}) ;
 
 				$(window).on('blur', () => {
 					becameBackground = true ;
-					console.log('blur')
 				}) ;
 			}) ;
 			
