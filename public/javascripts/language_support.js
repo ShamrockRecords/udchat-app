@@ -215,21 +215,31 @@ function getSupportedSpeechRecognitionLocales() {
         for (let key in localeIdentifiers) {
             let localeIdentifier = localeIdentifiers[key] ;
             let languageDisplayNames = new Intl.DisplayNames(getDefaultLanguage(), { type: 'language' });
+            let regionDisplayNames = new Intl.DisplayNames(getDefaultLanguage(), { type: 'region' });
             
             let supportedLocale = {} ;
 
             try {
-                if (localeIdentifier == "yue-Hant-HK") {
-                    supportedLocale['name'] = languageDisplayNames.of("zh-HK") ;
-                } else if (localeIdentifier == "cmn-Hans-CN") {
-                    supportedLocale['name'] = languageDisplayNames.of("zh-CN") ;
-                } else if (localeIdentifier == "cmn-Hant-TW") {
-                    supportedLocale['name'] = languageDisplayNames.of("zh-TW") ;
-                } else {
-                    supportedLocale['name'] = languageDisplayNames.of(localeIdentifier) ;
-                }
-
                 supportedLocale['language'] = localeIdentifier ;
+
+                let tempLocaleIdentifier = '' ;
+
+                if (localeIdentifier == "yue-Hant-HK") {
+                    tempLocaleIdentifier = "zh-HK" ;
+                } else if (localeIdentifier == "cmn-Hans-CN") {
+                    tempLocaleIdentifier = "zh-CN" ;
+                } else if (localeIdentifier == "cmn-Hant-TW") {
+                    tempLocaleIdentifier = "zh-TW" ;
+                } else if (localeIdentifier == "pa-Guru-IN") {
+                    continue ;
+                } else {
+                    tempLocaleIdentifier = localeIdentifier ;
+                }
+                
+                let language = tempLocaleIdentifier.split('-')[0] ;
+                let region = tempLocaleIdentifier.split('-')[1] ;
+
+                supportedLocale['name'] = languageDisplayNames.of(language) + '(' + regionDisplayNames.of(region) + ')' ;
                 
                 supportedLocales.push(supportedLocale) ;
             } catch(e) {
