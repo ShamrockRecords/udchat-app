@@ -158,10 +158,10 @@ function getSupportedSpeechRecognitionLocales() {
                             "ms-MY",
                             "ml-IN",
                             "mr-IN",
-                            "mn-MN　",
+                            "mn-MN",
                             "ne-NP",
                             "no-NO",
-                            "fa-IR　",
+                            "fa-IR",
                             "pl-PL",
                             "pt-BR",
                             "pt-PT",
@@ -240,11 +240,12 @@ function getSupportedSpeechRecognitionLocales() {
                 let region = tempLocaleIdentifier.split('-')[1] ;
 
                 supportedLocale['name'] = languageDisplayNames.of(language) + '(' + regionDisplayNames.of(region) + ')' ;
-                
-                supportedLocales.push(supportedLocale) ;
             } catch(e) {
-                console.log(e) ;
+                supportedLocale['language'] = localeIdentifier ;
+                supportedLocale['name'] = localeIdentifier ;
             }
+
+            supportedLocales.push(supportedLocale) ;
         }
 
         supportedLocales = supportedLocales.sort((a, b) => {
