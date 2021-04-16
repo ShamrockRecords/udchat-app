@@ -361,12 +361,19 @@
 					recognition.onstart = function() {
 						isSpeechRecognizing = true ;
 
-						$('#speechRecongizerButton').text('<%- __("認識中") %>') ;
+						$('#speechRecongizerButton').text('<%- __("認識中...") %>') ;
+						$('#speechRecongizerButton').css('background-color', 'white');
+						$('#speechRecongizerButton').css('border-color', 'gray');
+						$('#speechRecongizerButton').css('color', 'black');
 					}
 
 					recognition.onend = function() {
 						isSpeechRecognizing = false ;
+
 						$('#speechRecongizerButton').text('<%- __("音声入力") %>') ;
+						$('#speechRecongizerButton').css('background-color', 'orangered');
+						$('#speechRecongizerButton').css('border-color', 'orangered');
+						$('#speechRecongizerButton').css('color', 'white');
 					}
 
 					recognition.onspeechstart = function() {

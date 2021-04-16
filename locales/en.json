@@ -92,7 +92,7 @@
 	"バーコード": "Barcode",
 	"閉じる": "Close",
 	"音声入力": "Speech Input",
-	"認識中": "Recognizing...",
+	"認識中...": "Recognizing...",
 	"音声入力をする言語を選択します。": "You can select speech input language.",
 	"音声入力言語（Chromeのみ）": "Speech Input Language (Only Chrome)"
 }
