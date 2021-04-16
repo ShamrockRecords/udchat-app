@@ -80,7 +80,7 @@
 	"なし": "None",
 	"再翻訳して翻訳結果を確認する言語を選択します。": "You can select reverse translation language.",
 	"再翻訳言語": "Re-translate language",
-	"翻訳言語をリセット": "Reset Languages",
+	"言語設定をリセット": "Reset Languages",
 	"©︎ 2021 Shamrock Records, Inc": {
 		" CC BY 4": {
 			"0": "©︎ 2021 Shamrock Records, Inc. CC BY 4.0"
@@ -90,5 +90,9 @@
 	"APP_NAME_OPEN": "Open UD Chat",
 	"APP_NAME_SIGN_IN": "Sign In to UD Chat",
 	"バーコード": "Barcode",
-	"閉じる": "Close"
+	"閉じる": "Close",
+	"音声入力": "Speech Input",
+	"認識中": "Recognizing...",
+	"音声入力をする言語を選択します。": "You can select speech input language.",
+	"音声入力言語（Chromeのみ）": "Speech Input Language (Only Chrome)"
 }
