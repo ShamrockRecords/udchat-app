@@ -5,11 +5,13 @@ Official Site
 https://chat.udtalk.jp
 
 ## How to run
-1. npm install
+1. Install Node.js
+
+2. npm install
 
 After "git clone" to repository, run command "npm install".
 
-2. Make ".env" file and put at project root
+3. Make ".env" file and put at project root
 
 Put ".env fime" at project root after copying below.
 
