@@ -60,6 +60,11 @@
 				background-color:white;
 			}
 			
+			#speechRecongizerButton {
+				background-color:orangered;
+				border-color: orangered;
+			}
+
 			#notification {
 				z-index: 2;
 				position: absolute; 
@@ -99,6 +104,7 @@
 			let socket = io();
 			let isBottom = true ;
 			let becameBackground = false ;
+			let isSpeechRecognizing = false ;
 
 			function escapeHTML(string){
 				return string.replace(/\&/g, '&amp;')
@@ -239,8 +245,6 @@
 
 			// Window loaded.
 			$(window).on('load', async function() {
-				console.log('load') ;
-
 				Push.Permission.request();
 
 				$('#messages').scroll(() => {
@@ -309,7 +313,8 @@
 				initLauguageSelect('languages', getDefaultLanguage(), '', languages) ;
 				initLauguageSelect('inputLanguages', '', '<%- __("自動判別") %>', languages) ;
 				initLauguageSelect('reverseTranslationLanguages', '', '<%- __("なし") %>', languages) ;
-
+				initLauguageSelect('speechRecognitionLanguages', getDefaultLanguage(), '', languages) ;
+				
 				socket.send(JSON.stringify({
 					requestId: "<%= requestId %>",
 					uid: "<%= uid %>",
@@ -323,10 +328,12 @@
 					$('#languages').val(getDefaultLanguage()) ;
 					$('#inputLanguages').val('') ;
 					$('#reverseTranslationLanguages').val('') ;
+					$('#speechRecognitionLanguages').val(getDefaultLanguage()) ;
 
 					localStorage.setItem('languages', $('#languages' + ' option:selected').val());
 					localStorage.setItem('inputLanguages', $('#inputLanguages' + ' option:selected').val());
 					localStorage.setItem('reverseTranslationLanguages', $('#reverseTranslationLanguages' + ' option:selected').val());
+					localStorage.setItem('speechRecognitionLanguages', $('#speechRecognitionLanguages' + ' option:selected').val());
 				}) ;
 
 				$('#notification').on('click', () => {
@@ -342,8 +349,62 @@
 					}, 500);
 				}) ;
 
+				try {
+					SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+
+					const recognition = new SpeechRecognition();
+
+					recognition.onresult = (event) => {
+						send(event.results[event.results.length - 1][0].transcript) ;
+					}
+
+					recognition.onstart = function() {
+						isSpeechRecognizing = true ;
+
+						$('#speechRecongizerButton').text('<%- __("認識中...") %>') ;
+						$('#speechRecongizerButton').css('background-color', 'white');
+						$('#speechRecongizerButton').css('border-color', 'gray');
+						$('#speechRecongizerButton').css('color', 'black');
+					}
+
+					recognition.onend = function() {
+						isSpeechRecognizing = false ;
+
+						$('#speechRecongizerButton').text('<%- __("音声入力") %>') ;
+						$('#speechRecongizerButton').css('background-color', 'orangered');
+						$('#speechRecongizerButton').css('border-color', 'orangered');
+						$('#speechRecongizerButton').css('color', 'white');
+					}
+
+					recognition.onspeechstart = function() {
+
+					}
+
+					recognition.onspeechend = function() {
+						recognition.stop();
+					}
+
+					$('#speechRecongizerButton').on('click', () => {
+						if (!isSpeechRecognizing) {
+							recognition.lang = $('#speechRecognitionLanguages option:selected').val() ;
+							recognition.start();
+						} else {
+							recognition.abort() ;
+						}
+					}) ;
+
+					$('#speechRecongizerButtonCol').prop('hidden', false) ;
+				} catch (e) {
+					$('#speechRecongizerButtonCol').prop('hidden', true) ;
+					$('#speechRecognitionLanguages').prop("disabled", true);
+				}
+
 				$('#sendButton').on('click', () => {
-					send() ;
+					let text = $('#message').val() ;
+
+					$('#message').val('') ;
+
+					send(text) ;
 				}) ;
 
 				$(window).on('focus', () => {
@@ -358,17 +419,17 @@
 			// keypress detected.
 			$(document).keypress(function(e) {
 				if (!event.shiftKey &&　((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13))) {
-					send() ;
+					let text = $('#message').val() ;
+
+					$('#message').val('') ;
+
+					send(text) ;
 					e.preventDefault();
 				}
 			}) ;
 
 			// send message
-			async function send() {
-				let text = $('#message').val() ;
-
-				$('#message').val('') ;
-
+			async function send(text) {
 				if (text != '') {
 					let selectedInputLanguage = $('#inputLanguages option:selected').val() ;
 
@@ -407,17 +468,6 @@
 					})) ;
 				}
 			}
-
-			$(function(){
-				$('.js-modal-open').on('click',function(){
-					$('.js-modal').fadeIn();
-					return false;
-				});
-				$('.js-modal-close').on('click',function(){
-					$('.js-modal').fadeOut();
-					return false;
-				});	
-			});
 		</script>
 
 		<div id='main'>
@@ -431,6 +481,18 @@
 						<button class="btn btn-primary btn-sm" id="settingButton" type="button" data-toggle="collapse" data-target="#sample"><%- __("設定を開く") %></button>
 					</div>
 					<div class="col-auto p-0">
+						<script>
+							$(function(){
+								$('.js-modal-open').on('click',function(){
+									$('.js-modal').fadeIn();
+									return false;
+								});
+								$('.js-modal-close').on('click',function(){
+									$('.js-modal').fadeOut();
+									return false;
+								});	
+							});
+						</script>
 						<button class="js-modal-open btn btn-info btn-sm" type="button"><%- __("バーコード") %></button>
 						<div class="modal js-modal">
 							<div class="modal__bg js-modal-close"></div>
@@ -494,16 +556,28 @@
 											<select class="form-control" id="reverseTranslationLanguages" title="<%- __("再翻訳して翻訳結果を確認する言語を選択します。") %>"></select>
 										</div>
 									</div>
-									<div class="col"></div>
+									<div class="col">
+										<div class="form-group">
+											<label class="small" for="name"><%- __("音声入力言語（Chromeのみ）") %></label>
+											<select class="form-control" id="speechRecognitionLanguages" title="<%- __("音声入力をする言語を選択します。") %>"></select>
+										</div>
+									</div>
 									<div class="col align-self-center text-center">
-										<button class="btn btn-danger btn-sm" type="button" id="resetTranslationSettingsButton"><%- __("翻訳言語をリセット") %></button>
+										<button class="btn btn-danger btn-sm" type="button" id="resetTranslationSettingsButton"><%- __("言語設定をリセット") %></button>
 									</div>
 								</div>
 							<% } %>
 						</div>
 					</div>
 				</div>
-				<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="" maxlength="200" aria-describedby="hint"></textarea>
+				<div class="row">
+					<div class="col">
+						<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="" maxlength="200" aria-describedby="hint"></textarea>
+					</div>
+					<div class="col-auto align-self-center pl-0" id="speechRecongizerButtonCol" hidden>
+						<button class="form-control btn btn-primary my-1 btn-sm" style="width: 120px" id="speechRecongizerButton"><%- __("音声入力") %></button>							
+					</div>
+				</div>
 				<button class="form-control btn btn-primary my-1" id="sendButton"><%- __("送信") %></button>	
 				<div class="text-center my-1 small" id="hint"><%- __("Enterキーで送信 Shift+Enterで改行") %></div>
 			</div>
