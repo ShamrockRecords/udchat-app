@@ -240,14 +240,12 @@ function getSupportedSpeechRecognitionLocales() {
                 let region = tempLocaleIdentifier.split('-')[1] ;
 
                 supportedLocale['name'] = languageDisplayNames.of(language) + '(' + regionDisplayNames.of(region) + ')' ;
-                
-                supportedLocales.push(supportedLocale) ;
             } catch(e) {
                 supportedLocale['language'] = localeIdentifier ;
                 supportedLocale['name'] = localeIdentifier ;
-            
-                supportedLocales.push(supportedLocale) ;
             }
+
+            supportedLocales.push(supportedLocale) ;
         }
 
         supportedLocales = supportedLocales.sort((a, b) => {
