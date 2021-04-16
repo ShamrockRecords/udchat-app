@@ -244,7 +244,7 @@
 			});
 
 			// Window loaded.
-			$(window).on('load', async function() {
+			$(window).on('load', async function() {				
 				Push.Permission.request();
 
 				$('#messages').scroll(() => {
@@ -272,7 +272,8 @@
 				$('#notification').hide() ;
 
 				let languages = await supportedLanguages("<%= apiKey %>") ;
-				
+				let locales = getSupportedSpeechRecognitionLocales() ;
+
 				function initLauguageSelect(tag, defaultLanguage, defaultOption, languages) {
 					
 					if (localStorage.getItem(tag)) {
@@ -313,7 +314,7 @@
 				initLauguageSelect('languages', getDefaultLanguage(), '', languages) ;
 				initLauguageSelect('inputLanguages', '', '<%- __("自動判別") %>', languages) ;
 				initLauguageSelect('reverseTranslationLanguages', '', '<%- __("なし") %>', languages) ;
-				initLauguageSelect('speechRecognitionLanguages', getDefaultLanguage(), '', languages) ;
+				initLauguageSelect('speechRecognitionLocales', '', '<%- __("ブラウザ設定") %>', locales) ;
 				
 				socket.send(JSON.stringify({
 					requestId: "<%= requestId %>",
@@ -328,12 +329,12 @@
 					$('#languages').val(getDefaultLanguage()) ;
 					$('#inputLanguages').val('') ;
 					$('#reverseTranslationLanguages').val('') ;
-					$('#speechRecognitionLanguages').val(getDefaultLanguage()) ;
+					$('#speechRecognitionLocales').val('') ;
 
 					localStorage.setItem('languages', $('#languages' + ' option:selected').val());
 					localStorage.setItem('inputLanguages', $('#inputLanguages' + ' option:selected').val());
 					localStorage.setItem('reverseTranslationLanguages', $('#reverseTranslationLanguages' + ' option:selected').val());
-					localStorage.setItem('speechRecognitionLanguages', $('#speechRecognitionLanguages' + ' option:selected').val());
+					localStorage.setItem('speechRecognitionLocales', $('#speechRecognitionLocales' + ' option:selected').val());
 				}) ;
 
 				$('#notification').on('click', () => {
@@ -386,7 +387,7 @@
 
 					$('#speechRecongizerButton').on('click', () => {
 						if (!isSpeechRecognizing) {
-							recognition.lang = $('#speechRecognitionLanguages option:selected').val() ;
+							recognition.lang = $('#speechRecognitionLocales option:selected').val() ;
 							recognition.start();
 						} else {
 							recognition.abort() ;
@@ -396,7 +397,7 @@
 					$('#speechRecongizerButtonCol').prop('hidden', false) ;
 				} catch (e) {
 					$('#speechRecongizerButtonCol').prop('hidden', true) ;
-					$('#speechRecognitionLanguages').prop("disabled", true);
+					$('#speechRecognitionLocales').prop("disabled", true);
 				}
 
 				$('#sendButton').on('click', () => {
@@ -559,7 +560,7 @@
 									<div class="col">
 										<div class="form-group">
 											<label class="small" for="name"><%- __("音声入力言語（Chromeのみ）") %></label>
-											<select class="form-control" id="speechRecognitionLanguages" title="<%- __("音声入力をする言語を選択します。") %>"></select>
+											<select class="form-control" id="speechRecognitionLocales" title="<%- __("音声入力をする言語を選択します。") %>"></select>
 										</div>
 									</div>
 									<div class="col align-self-center text-center">
