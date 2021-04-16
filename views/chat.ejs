@@ -392,8 +392,11 @@
 							recognition.abort() ;
 						}
 					}) ;
+
+					$('#speechRecongizerButtonCol').prop('hidden', false) ;
 				} catch (e) {
-					$('#speechRecongizerButton').prop("disabled", true);
+					$('#speechRecongizerButtonCol').prop('hidden', true) ;
+					$('#speechRecognitionLanguages').prop("disabled", true);
 				}
 
 				$('#sendButton').on('click', () => {
@@ -571,7 +574,7 @@
 					<div class="col">
 						<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="" maxlength="200" aria-describedby="hint"></textarea>
 					</div>
-					<div class="col-auto align-self-center pl-0">
+					<div class="col-auto align-self-center pl-0" id="speechRecongizerButtonCol" hidden>
 						<button class="form-control btn btn-primary my-1 btn-sm" style="width: 120px" id="speechRecongizerButton"><%- __("音声入力") %></button>							
 					</div>
 				</div>
