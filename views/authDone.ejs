@@ -36,7 +36,7 @@
 
 				firebase.auth().signOut() ;
 
-				let URL = '/verify?uid=' + uid ;
+				let URL = '/auth_done/verify?uid=' + uid ;
 
 				await fetch(URL).then(response => response.json()) ;
 
