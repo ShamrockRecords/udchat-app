@@ -4,6 +4,35 @@
         <title><%- __("UD Chat") %> - <%- __("サインイン") %></title>
         <%- include('parts/head', {}) %>
         <link href="stylesheets/signin.css" rel="stylesheet">
+
+        <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth__ja.js"></script>
+        <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
+        <script>
+            var config = {
+                apiKey: "AIzaSyBYIpvruolij1GIGgS2snesocZZ5_IO0AE",
+                authDomain: "udchat-4ae66.firebaseapp.com",
+                projectId: "udchat-4ae66",
+                storageBucket: "udchat-4ae66.appspot.com",
+                messagingSenderId: "963203963895",
+                appId: "1:963203963895:web:ae4a3c4b6c5c8d04426cf2",
+                measurementId: "G-6TGB2JY5LH"
+            };
+	
+	        firebase.initializeApp(config);
+
+            var uiConfig = {
+                signInSuccessUrl: '/done.html',
+                signInOptions: [
+                    firebase.auth.FacebookAuthProvider.PROVIDER_ID
+                ],
+            };
+
+            var ui = new firebaseui.auth.AuthUI(firebase.auth());
+            ui.start('#firebaseui-auth-container', uiConfig);
+        </script>
     </head>
     <body>
         <div class="container text-center">
@@ -34,6 +63,7 @@
                         <a href="/signup"><%- __("初めてサインインする方はこちら") %></a>
                     <% } %>
                 </div>
+                <div id="firebaseui-auth-container"></div>
                 <% if (errorMessage != '') { %>
                     <div class="alert alert-primary my-3" role="alert">
                         <%= errorMessage %>
