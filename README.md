@@ -38,6 +38,8 @@ FIREBASE_ADMINSDK_auth_uri = ""
 FIREBASE_ADMINSDK_token_uri = ""
 FIREBASE_ADMINSDK_auth_provider_x509_cert_url = ""
 FIREBASE_ADMINSDK_client_x509_cert_url = ""
+
+OPENED_FIREBASE_API_KEY = ""
 ```
 ### firestoreへのアクセス
 
@@ -95,6 +97,14 @@ FIREBASE_ADMINSDK_auth_uri = ""
 FIREBASE_ADMINSDK_token_uri = ""
 FIREBASE_ADMINSDK_auth_provider_x509_cert_url = ""
 FIREBASE_ADMINSDK_client_x509_cert_url = ""
+```
+
+### SNSログインのためのキー
+
+SNSログインを有効にする場合はここにAPIキーを入れてください。このキーにはきちんとリファラーで制限をかけてください。
+
+```
+OPENED_FIREBASE_API_KEY = ""
 ```
 
 ### 動作させるドメイン
