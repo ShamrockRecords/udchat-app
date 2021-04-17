@@ -96,7 +96,7 @@ class firebaseSession {
 
         console.log('idToken:' + idToken) ;
 
-		sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
+		let sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
 
         console.log('sessionCookie:' + sessionCookie) ;
 
