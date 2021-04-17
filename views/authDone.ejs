@@ -1,37 +1,44 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="utf-8">
-		<title>Firebase Auth</title>
+		<title><%- __("UD Chat") %></title>
+		<%- include('parts/head', {}) %>
 	</head>
 	<body>
-		<h1>...Please wait</h1>
-		<div id="info"></div>
-
+		<div class="container">
+			<h1>...Please wait</h1>
+		</div>
 		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
 		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 		<% if (config.apiKey != '') { %>
 		<script>
+ 
+ 		$(window).on('load', async function() {		
+			let config = {
+				apiKey: "<%= config.apiKey %>",
+				authDomain: "<%= config.authDomain %>",
+				projectId: "<%= config.projectId %>",
+				storageBucket: "<%= config.storageBucket %>",
+				messagingSenderId: "<%= config.messagingSenderId %>",
+				appId: "<%= config.appId %>",
+				measurementId: "<%= config.measurementId %>"
+			};
 
-		let config = {
-			apiKey: "<%= config.apiKey %>",
-			authDomain: "<%= config.authDomain %>",
-			projectId: "<%= config.projectId %>",
-			storageBucket: "<%= config.storageBucket %>",
-			messagingSenderId: "<%= config.messagingSenderId %>",
-			appId: "<%= config.appId %>",
-			measurementId: "<%= config.measurementId %>"
-		};
+			firebase.initializeApp(config);
 
-		firebase.initializeApp(config);
+			if (firebase.currentUser == null) {
+				location.href = "/" ;
+				return ;
+			}
 
-		firebase.auth().onAuthStateChanged((user) => {
-			let uid = user.uid ;
+			firebase.auth().onAuthStateChanged((user) => {
+				let uid = user.uid ;
 
-            firebase.auth().signOut() ;
+				firebase.auth().signOut() ;
 
-			location.href = "/signin?uid=" + uid ;
-		});
+				location.href = "/signin?uid=" + uid ;
+			});
+		}) ;
 		</script>
 		<% } %>
 	</body>
