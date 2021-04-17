@@ -25,12 +25,10 @@
 
 		firebase.initializeApp(config);
 
-		firebase.auth().onAuthStateChanged(async (user) => {
+		firebase.auth().onAuthStateChanged((user) => {
 			let uid = user.uid ;
 
-            await firebase.auth().signOut() ;
-
-			console.log(sessionCookie) ;
+            firebase.auth().signOut() ;
 
 			location.href = "/signin?uid=" + uid ;
 		});
