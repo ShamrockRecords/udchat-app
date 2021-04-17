@@ -82,7 +82,9 @@ class firebaseSession {
         }
     }
 
-    async signInFromUI(uid) {
+    async signInFromUI(uid, res) {
+        const expiresIn = 60 * 60 * 24 * 14 * 1000;
+        
         let customToken = await admin.auth().createCustomToken(uid) ;
 
 		let userRecord = await firebase.auth().signInWithCustomToken(customToken) ;
