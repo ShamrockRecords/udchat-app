@@ -6,24 +6,7 @@ const uuid = require('node-uuid');
 
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 
-function randomeName() {
-    var letters = 'abcdefghijklmnopqrstuvwxyz';
-    var numbers = '0123456789';
-
-    var string  = letters + letters.toUpperCase() + numbers;
-
-    var len = 8;　　　//8文字
-    var password=''; //文字列が空っぽという定義をする
-
-    for (var i = 0; i < len; i++) {
-        password += string.charAt(Math.floor(Math.random() * string.length));
-    }
-
-    return password ;
-}
-
 router.get('/', wrap(async function(req, res, next) {
-    let result = await firebaseSession.enter(req, res) ;
     let chatId = req.query.chatId ;   
     let currentUser = req.session.user ;
     let uid = currentUser != undefined ? currentUser.uid : null ;
@@ -116,6 +99,24 @@ router.post('/passcode', wrap(async function(req, res, next) {
     req.session.displayName = displayName ;
 
     res.redirect("/chat?chatId=" + chatId) ;
+})) ;
+
+router.get('/verify', wrap(async function(req, res, next) {
+    let chatId = req.query.chatId ; 
+    
+    {
+        let doc = await admin.firestore().collection("chats").doc(chatId).get() ;
+        data = doc.data() ;
+    }
+
+    let result = false ;
+
+    if (data != null) {
+        result = true ;
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({result: result}));
 })) ;
 
 module.exports = router;
