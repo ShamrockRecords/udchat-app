@@ -4,10 +4,15 @@
 		<title><%- __("UD Chat") %></title>
 		<%- include('parts/head', {}) %>
 	</head>
-	<body>
+	<body class="p-3">
 		<div class="container">
-			<h1>...Please wait</h1>
+			<h1><%- __("お待ちください") %></h1>
 		</div>
+
+		<div class="container">
+			<a href="/"><%- __("画面が変わらない方はこちら") %></a>
+		</div>
+		
 		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
 		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 		<% if (config.apiKey != '') { %>
@@ -25,11 +30,6 @@
 			};
 
 			firebase.initializeApp(config);
-
-			if (firebase.currentUser == null) {
-				location.href = "/" ;
-				return ;
-			}
 
 			firebase.auth().onAuthStateChanged((user) => {
 				let uid = user.uid ;

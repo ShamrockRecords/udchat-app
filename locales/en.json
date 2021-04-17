@@ -96,5 +96,7 @@
 	"音声入力をする言語を選択します。": "You can select speech input language.",
 	"音声入力言語（Chromeのみ）": "Speech Input Language (Only Chrome)",
 	"ブラウザ設定": "Browser Setting",
-	"メールアドレスが確認されていません。": "Email is not verified."
+	"メールアドレスが確認されていません。": "Email is not verified.",
+	"画面が変わらない方はこちら": "Click here if page did not change.",
+	"お待ちください": "Please wait"
 }
