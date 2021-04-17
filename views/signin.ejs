@@ -9,10 +9,21 @@
         <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth__ja.js"></script>
         <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+        
+        <% if (config.apiKey != '') { %>
+        <script>  
+            var config = {
+                apiKey: "<%= config.apiKey %>",
+                authDomain: "<%= config.authDomain %>",
+                projectId: "<%= config.projectId %>",
+                storageBucket: "<%= config.storageBucket %>",
+                messagingSenderId: "<%= config.messagingSenderId %>",
+                appId: "<%= config.appId %>",
+                measurementId: "<%= config.measurementId %>"
+            };
 
-        <script src="/javascripts/firebase_config.js"></script>
+            firebase.initializeApp(config);
 
-        <script>
             var uiConfig = {
                 signInSuccessUrl: '/auth_done.html',
                 signInOptions: [
@@ -21,8 +32,9 @@
             };
 
             var ui = new firebaseui.auth.AuthUI(firebase.auth());
-            ui.start('#firebaseui-auth-container', uiConfig);
+            ui.start('#firebaseui-auth-container', uiConfig);   
         </script>
+        <% } %>
     </head>
     <body>
         <div class="container text-center">

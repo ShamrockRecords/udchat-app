@@ -1,31 +1,44 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Firebase Auth</title>
-</head>
-<body>
-  <h1>...Please wait</h1>
-  <div id="info"></div>
+	<head>
+		<meta charset="utf-8">
+		<title>Firebase Auth</title>
+	</head>
+	<body>
+		<h1>...Please wait</h1>
+		<div id="info"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
-  <script src="/javascripts/firebase_config.js"></script>
-  <script>
-    firebase.auth().onAuthStateChanged( (user) => {
-      let h1   = document.querySelector('h1');
-      let info = document.querySelector('#info');
+		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+		<% if (config.apiKey != '') { %>
+		<script>
 
-      if(user) {
-        h1.innerText   = 'Login Complete!';
-        info.innerHTML = `${user.displayName}さんがログインしました<br>` +
-                         `(${user.uid})`;
-        console.log(user);
-      }
-      else {
-        h1.innerText = 'Not Login';
-      }
-    });
-  </script>
-</body>
+		let config = {
+			apiKey: "<%= config.apiKey %>",
+			authDomain: "<%= config.authDomain %>",
+			projectId: "<%= config.projectId %>",
+			storageBucket: "<%= config.storageBucket %>",
+			messagingSenderId: "<%= config.messagingSenderId %>",
+			appId: "<%= config.appId %>",
+			measurementId: "<%= config.measurementId %>"
+		};
+
+		firebase.initializeApp(config);
+
+		firebase.auth().onAuthStateChanged(async (user) => {
+			let idToken = await user.getIdToken() ;
+        
+            const expiresIn = 60 * 60 * 24 * 14 * 1000;
+
+            let sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn }) ;
+
+            await firebase.auth().signOut() ;
+
+			console.log(sessionCookie) ;
+			
+			location.href = "/" ;
+		});
+		</script>
+		<% } %>
+	</body>
 </html>
