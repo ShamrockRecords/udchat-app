@@ -18,7 +18,8 @@ class firebaseSession {
 
             let user = decodedClaims ;
 
-            if (user.firebase.identities["facebook.com"] == undefined) {
+            if (user.firebase.identities["facebook.com"] == undefined &&
+                user.firebase.identities["twitter.com"] == undefined) {
                 if (!decodedClaims || !decodedClaims.email_verified) {
                     throw new Error(res.__("メールアドレスが確認されていません。"));
                 }
