@@ -20,7 +20,7 @@ class firebaseSession {
 
             if (user.firebase.identities["facebook.com"] == undefined) {
                 if (!decodedClaims || !decodedClaims.email_verified) {
-                    throw new Error('Email is not verified.');
+                    throw new Error(res.__("メールアドレスが確認されていません。"));
                 }
             }
             
@@ -60,8 +60,7 @@ class firebaseSession {
             let user = userRecord.user ;
 
             if (!user.emailVerified) {
-                await user.sendEmailVerification() ;
-                throw new Error('Email is not verified.');
+                throw new Error(res.__("メールアドレスが確認されていません。"));
             }
 
             let idToken = await user.getIdToken() ;
