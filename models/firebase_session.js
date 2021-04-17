@@ -94,11 +94,11 @@ class firebaseSession {
 
 		let idToken = await user.getIdToken() ;
 
-        onsole.log('idToken:' + idToken) ;
+        console.log('idToken:' + idToken) ;
 
 		sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
 
-        onsole.log('sessionCookie:' + sessionCookie) ;
+        console.log('sessionCookie:' + sessionCookie) ;
 
 		res.cookie('sessionCookie', sessionCookie, {maxAge: expiresIn, httpOnly: false});
 
