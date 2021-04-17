@@ -17,6 +17,8 @@ router.get('/', async function(req, res, next) {
 }) ;
 
 router.get('/verify', async function(req, res, next) {
+    console.log("verify was called.") ;
+    
     if (req.query.uid != undefined && req.query.uid != '') {
 		await firebaseSession.signInFromUI(req.query.uid, res) ;
         res.setHeader('Content-Type', 'application/json');
