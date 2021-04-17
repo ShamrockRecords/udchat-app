@@ -99,6 +99,14 @@ FIREBASE_ADMINSDK_auth_provider_x509_cert_url = ""
 FIREBASE_ADMINSDK_client_x509_cert_url = ""
 ```
 
+### API key for SNS login
+
+Write API key if you want to use SNS login of firebase. You have to set referer limitation for this API key at Google Cloud console.
+
+```
+OPENED_FIREBASE_API_KEY = ""
+```
+
 ### Running domain
 
 Set your running domain.
