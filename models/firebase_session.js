@@ -17,7 +17,7 @@ class firebaseSession {
             decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true) ;
 
             if (!decodedClaims || !decodedClaims.email_verified) {
-                //throw new Error('Email is not verified.');
+                throw new Error('Email is not verified.');
             }
 
             let user = decodedClaims ;
@@ -84,6 +84,8 @@ class firebaseSession {
 
     async signInFromUI(uid, res) {
         const expiresIn = 60 * 60 * 24 * 14 * 1000;
+        
+        console.log('uid:' + uid) ;
 
         let customToken = await admin.auth().createCustomToken(uid) ;
 
@@ -92,7 +94,11 @@ class firebaseSession {
 
 		let idToken = await user.getIdToken() ;
 
+        onsole.log('idToken:' + idToken) ;
+
 		sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
+
+        onsole.log('sessionCookie:' + sessionCookie) ;
 
 		res.cookie('sessionCookie', sessionCookie, {maxAge: expiresIn, httpOnly: false});
 
