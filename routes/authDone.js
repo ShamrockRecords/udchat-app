@@ -1,4 +1,5 @@
 var express = require('express');
+let firebaseSession = require('../models/firebase_session.js') ;
 var router = express.Router() ;
 
 router.get('/', async function(req, res, next) {
@@ -18,6 +19,7 @@ router.get('/', async function(req, res, next) {
 router.get('/verify', async function(req, res, next) {
     if (req.query.uid != undefined && req.query.uid != '') {
 		await firebaseSession.signInFromUI(req.query.uid, res) ;
+        res.end('');
 	} else {
         res.redirect("/") ;
     }
