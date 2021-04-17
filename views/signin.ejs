@@ -4,6 +4,38 @@
         <title><%- __("UD Chat") %> - <%- __("サインイン") %></title>
         <%- include('parts/head', {}) %>
         <link href="stylesheets/signin.css" rel="stylesheet">
+
+        <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth__ja.js"></script>
+        <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
+        <% if (config.apiKey != '') { %>
+        <script>  
+            var config = {
+                apiKey: "<%= config.apiKey %>",
+                authDomain: "<%= config.authDomain %>",
+                projectId: "<%= config.projectId %>",
+                storageBucket: "<%= config.storageBucket %>",
+                messagingSenderId: "<%= config.messagingSenderId %>",
+                appId: "<%= config.appId %>",
+                measurementId: "<%= config.measurementId %>"
+            };
+
+            firebase.initializeApp(config);
+
+            var uiConfig = {
+                signInSuccessUrl: '/auth_done',
+                signInOptions: [
+                    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+                    firebase.auth.TwitterAuthProvider.PROVIDER_ID
+                ],
+            };
+
+            var ui = new firebaseui.auth.AuthUI(firebase.auth());
+            ui.start('#firebaseui-auth-container', uiConfig);   
+        </script>
+        <% } %>
     </head>
     <body>
         <div class="container text-center">
@@ -24,6 +56,14 @@
                 <input type="password" name="password" id="inputPassword" class="form-control" placeholder="<%- __("パスワード") %>" required>
                 <input type="hidden" name="chatId" value="<%= chatId %>">
                 <button class="btn btn-lg btn-primary btn-block" type="submit"><%- __("サインイン") %></button>
+                <% if (errorMessage != '') { %>
+                    <div class="alert alert-primary my-3" role="alert">
+                        <%= errorMessage %>
+                    </div>
+                <% } %>
+            </form>
+
+            <div class="container">
                 <div class="my-3">
                     <a href="/reset_password"><%- __("パスワードを忘れた方はこちら") %></a>
                 </div>
@@ -34,20 +74,18 @@
                         <a href="/signup"><%- __("初めてサインインする方はこちら") %></a>
                     <% } %>
                 </div>
-                <% if (errorMessage != '') { %>
-                    <div class="alert alert-primary my-3" role="alert">
-                        <%= errorMessage %>
-                    </div>
-                <% } %>
-                <div class="alert alert-secondary p-3">
-                    <p><%- __("とりあえずベータ公開です。") %></p>
-                    <p><%- __("サーバー負荷とかコストの関係で予告なしに閉じるかもしれませんがご了承ください。") %></p>
-                </div>
-                <div class="container">
-                    <a href="/about"><%- __("ご利用について") %></a>
-                </div>
+            </div>
+
+            <div class="container">
+                <div id="firebaseui-auth-container"></div>
+            </div>
+
+            <div class="container">
+                <a href="/about"><%- __("ご利用について") %></a>
+            </div>
+            <div class="container">
                 <p class="my-3 text-muted"><%- __("©︎ 2021 Shamrock Records, Inc. CC BY 4.0") %></p>
-            </form>
+            </div>
         </div>
     </body>
 </html>

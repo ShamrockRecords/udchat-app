@@ -16,12 +16,15 @@ class firebaseSession {
         try {
             decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true) ;
 
-            if (!decodedClaims || !decodedClaims.email_verified) {
-                throw new Error('Email is not verified.');
-            }
-
             let user = decodedClaims ;
 
+            if (user.firebase.identities["facebook.com"] == undefined &&
+                user.firebase.identities["twitter.com"] == undefined) {
+                if (!decodedClaims || !decodedClaims.email_verified) {
+                    throw new Error(res.__("メールアドレスが確認されていません。"));
+                }
+            }
+            
             /*
             let customToken = await admin.auth().createCustomToken(decodedClaims.uid) ;
 
@@ -58,7 +61,7 @@ class firebaseSession {
             let user = userRecord.user ;
 
             if (!user.emailVerified) {
-                throw new Error('Email is not verified.');
+                throw new Error(res.__("メールアドレスが確認されていません。"));
             }
 
             let idToken = await user.getIdToken() ;
@@ -80,6 +83,23 @@ class firebaseSession {
 
             completion(false, email, error.message) ;
         }
+    }
+
+    async signInFromUI(uid, res) {    
+        let customToken = await admin.auth().createCustomToken(uid) ;
+
+		let userRecord = await firebase.auth().signInWithCustomToken(customToken) ;
+		let user = userRecord.user ;
+
+		let idToken = await user.getIdToken() ;
+
+        const expiresIn = 60 * 60 * 24 * 14 * 1000;
+        
+		let sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
+
+		res.cookie('sessionCookie', sessionCookie, {maxAge: expiresIn, httpOnly: false});
+
+		await firebase.auth().signOut() ;
     }
 
     async signUp(req, res, completion) {
