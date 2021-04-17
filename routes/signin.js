@@ -6,7 +6,7 @@ let router = express.Router();
 router.get('/', function(req, res, next) {
 
 	if (req.query.uid != undefined && req.query.uid != '') {
-		firebaseSession.signInFromUI(req.query.uid) ;
+		firebaseSession.signInFromUI(req.query.uid, res) ;
 
 		res.redirect("/") ;
 
