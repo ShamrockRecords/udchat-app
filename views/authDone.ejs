@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%- __("UD Chat") %></title>
+		<%- include('parts/head', {}) %>
+	</head>
+	<body class="p-3">
+		<div class="container">
+			<h1><%- __("お待ちください") %></h1>
+		</div>
+
+		<div class="container">
+			<a href="/"><%- __("画面が変わらない方はこちら") %></a>
+		</div>
+
+		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+		<% if (config.apiKey != '') { %>
+		<script>
+ 
+ 		$(window).on('load', async function() {		
+			let config = {
+				apiKey: "<%= config.apiKey %>",
+				authDomain: "<%= config.authDomain %>",
+				projectId: "<%= config.projectId %>",
+				storageBucket: "<%= config.storageBucket %>",
+				messagingSenderId: "<%= config.messagingSenderId %>",
+				appId: "<%= config.appId %>",
+				measurementId: "<%= config.measurementId %>"
+			};
+
+			firebase.initializeApp(config);
+
+			firebase.auth().onAuthStateChanged(async (user) => {
+				let uid = user.uid ;
+
+				firebase.auth().signOut() ;
+
+				let URL = '/auth_done/verify?uid=' + uid ;
+
+				await fetch(URL).then(response => response.json()) ;
+
+				location.href = "/" ;
+			});
+		}) ;
+		</script>
+		<% } %>
+	</body>
+</html>
