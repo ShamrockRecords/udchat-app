@@ -31,7 +31,7 @@
 
 			firebase.initializeApp(config);
 
-			firebase.auth().onAuthStateChanged((user) => {
+			firebase.auth().onAuthStateChanged(async (user) => {
 				let uid = user.uid ;
 
 				firebase.auth().signOut() ;
@@ -39,7 +39,7 @@
 				let URL = '/verify?uid=' + uid ;
 
 				await fetch(URL).then(response => response.json()) ;
-				
+
 				location.href = "/" ;
 			});
 		}) ;
