@@ -16,12 +16,14 @@ class firebaseSession {
         try {
             decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true) ;
 
-            if (!decodedClaims || !decodedClaims.email_verified) {
-                throw new Error('Email is not verified.');
-            }
-
             let user = decodedClaims ;
 
+            if (user.firebase.identities["facebook.com"] == undefined) {
+                if (!decodedClaims || !decodedClaims.email_verified) {
+                    throw new Error('Email is not verified.');
+                }
+            }
+            
             /*
             let customToken = await admin.auth().createCustomToken(decodedClaims.uid) ;
 
