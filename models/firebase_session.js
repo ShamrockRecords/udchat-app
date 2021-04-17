@@ -58,6 +58,7 @@ class firebaseSession {
             let user = userRecord.user ;
 
             if (!user.emailVerified) {
+                await user.sendEmailVerification() ;
                 throw new Error('Email is not verified.');
             }
 
@@ -83,8 +84,6 @@ class firebaseSession {
     }
 
     async signInFromUI(uid, res) {    
-        console.log('uid:' + uid) ;
-
         let customToken = await admin.auth().createCustomToken(uid) ;
 
 		let userRecord = await firebase.auth().signInWithCustomToken(customToken) ;
@@ -92,13 +91,9 @@ class firebaseSession {
 
 		let idToken = await user.getIdToken() ;
 
-        console.log('idToken:' + idToken) ;
-
         const expiresIn = 60 * 60 * 24 * 14 * 1000;
         
 		let sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
-
-        console.log('sessionCookie:' + sessionCookie) ;
 
 		res.cookie('sessionCookie', sessionCookie, {maxAge: expiresIn, httpOnly: false});
 
