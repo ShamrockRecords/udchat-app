@@ -82,6 +82,21 @@ class firebaseSession {
         }
     }
 
+    async singInFromUI(uid) {
+        let customToken = await admin.auth().createCustomToken(uid) ;
+
+		let userRecord = await firebase.auth().signInWithCustomToken(customToken) ;
+		let user = userRecord.user ;
+
+		let idToken = await user.getIdToken() ;
+
+		sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
+
+		res.cookie('sessionCookie', sessionCookie, {maxAge: expiresIn, httpOnly: false});
+
+		await firebase.auth().signOut() ;
+    }
+
     async signUp(req, res, completion) {
         let email = req.body.email ;
         let password = req.body.password ;

@@ -26,17 +26,13 @@
 		firebase.initializeApp(config);
 
 		firebase.auth().onAuthStateChanged(async (user) => {
-			let idToken = await user.getIdToken() ;
-        
-            const expiresIn = 60 * 60 * 24 * 14 * 1000;
-
-            let sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn }) ;
+			let uid = user.uid ;
 
             await firebase.auth().signOut() ;
 
 			console.log(sessionCookie) ;
-			
-			location.href = "/" ;
+
+			location.href = "/signin?uid=" + uid ;
 		});
 		</script>
 		<% } %>
