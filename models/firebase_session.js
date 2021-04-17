@@ -82,9 +82,7 @@ class firebaseSession {
         }
     }
 
-    async signInFromUI(uid, res) {
-        const expiresIn = 60 * 60 * 24 * 14 * 1000;
-        
+    async signInFromUI(uid, res) {    
         console.log('uid:' + uid) ;
 
         let customToken = await admin.auth().createCustomToken(uid) ;
@@ -96,6 +94,8 @@ class firebaseSession {
 
         console.log('idToken:' + idToken) ;
 
+        const expiresIn = 60 * 60 * 24 * 14 * 1000;
+        
 		let sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
 
         console.log('sessionCookie:' + sessionCookie) ;
