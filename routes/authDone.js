@@ -22,7 +22,7 @@ router.get('/verify', async function(req, res, next) {
     if (req.query.uid != undefined && req.query.uid != '') {
 		await firebaseSession.signInFromUI(req.query.uid, res) ;
         res.setHeader('Content-Type', 'application/json');
-        res.end({result: true});
+        res.end(JSON.stringify({result: true}));
 	} else {
         res.redirect("/") ;
     }
