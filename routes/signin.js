@@ -3,10 +3,10 @@ let firebaseSession = require('../models/firebase_session.js') ;
 
 let router = express.Router();
 
-router.get('/', function(req, res, next) {
+router.get('/', async function(req, res, next) {
 
 	if (req.query.uid != undefined && req.query.uid != '') {
-		firebaseSession.signInFromUI(req.query.uid, res) ;
+		await firebaseSession.signInFromUI(req.query.uid, res) ;
 
 		res.redirect("/") ;
 
