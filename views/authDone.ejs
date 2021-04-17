@@ -12,7 +12,7 @@
 		<div class="container">
 			<a href="/"><%- __("画面が変わらない方はこちら") %></a>
 		</div>
-		
+
 		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
 		<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 		<% if (config.apiKey != '') { %>
@@ -36,7 +36,11 @@
 
 				firebase.auth().signOut() ;
 
-				location.href = "/signin?uid=" + uid ;
+				let URL = '/verify?uid=' + uid ;
+
+				await fetch(URL).then(response => response.json()) ;
+				
+				location.href = "/" ;
 			});
 		}) ;
 		</script>

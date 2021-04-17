@@ -15,4 +15,12 @@ router.get('/', async function(req, res, next) {
     res.render('authDone', {config: config});		 
 }) ;
 
+router.get('/verify', async function(req, res, next) {
+    if (req.query.uid != undefined && req.query.uid != '') {
+		await firebaseSession.signInFromUI(req.query.uid, res) ;
+	} else {
+        res.redirect("/") ;
+    }
+}) ;
+
 module.exports = router;
