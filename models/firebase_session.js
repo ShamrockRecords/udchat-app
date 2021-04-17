@@ -82,7 +82,7 @@ class firebaseSession {
         }
     }
 
-    async singInFromUI(uid) {
+    async signInFromUI(uid) {
         let customToken = await admin.auth().createCustomToken(uid) ;
 
 		let userRecord = await firebase.auth().signInWithCustomToken(customToken) ;
