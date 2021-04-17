@@ -17,7 +17,7 @@ class firebaseSession {
             decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true) ;
 
             if (!decodedClaims || !decodedClaims.email_verified) {
-                throw new Error('Email is not verified.');
+                //throw new Error('Email is not verified.');
             }
 
             let user = decodedClaims ;
@@ -84,7 +84,7 @@ class firebaseSession {
 
     async signInFromUI(uid, res) {
         const expiresIn = 60 * 60 * 24 * 14 * 1000;
-        
+
         let customToken = await admin.auth().createCustomToken(uid) ;
 
 		let userRecord = await firebase.auth().signInWithCustomToken(customToken) ;
