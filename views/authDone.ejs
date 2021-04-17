@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Firebase Auth</title>
+</head>
+<body>
+  <h1>...Please wait</h1>
+  <div id="info"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+  <script src="/javascripts/firebase_config.js"></script>
+  <script>
+    firebase.auth().onAuthStateChanged( (user) => {
+      let h1   = document.querySelector('h1');
+      let info = document.querySelector('#info');
+
+      if(user) {
+        h1.innerText   = 'Login Complete!';
+        info.innerHTML = `${user.displayName}さんがログインしました<br>` +
+                         `(${user.uid})`;
+        console.log(user);
+      }
+      else {
+        h1.innerText = 'Not Login';
+      }
+    });
+  </script>
+</body>
+</html>

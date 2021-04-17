@@ -10,21 +10,11 @@
         <script src="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth__ja.js"></script>
         <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
 
-        <script>
-            var config = {
-                apiKey: "AIzaSyBYIpvruolij1GIGgS2snesocZZ5_IO0AE",
-                authDomain: "udchat-4ae66.firebaseapp.com",
-                projectId: "udchat-4ae66",
-                storageBucket: "udchat-4ae66.appspot.com",
-                messagingSenderId: "963203963895",
-                appId: "1:963203963895:web:ae4a3c4b6c5c8d04426cf2",
-                measurementId: "G-6TGB2JY5LH"
-            };
-	
-	        firebase.initializeApp(config);
+        <script src="/javascripts/firebase_config.js"></script>
 
+        <script>
             var uiConfig = {
-                signInSuccessUrl: '/done.html',
+                signInSuccessUrl: '/auth_done.html',
                 signInOptions: [
                     firebase.auth.FacebookAuthProvider.PROVIDER_ID
                 ],
@@ -53,6 +43,9 @@
                 <input type="password" name="password" id="inputPassword" class="form-control" placeholder="<%- __("パスワード") %>" required>
                 <input type="hidden" name="chatId" value="<%= chatId %>">
                 <button class="btn btn-lg btn-primary btn-block" type="submit"><%- __("サインイン") %></button>
+            </form>
+
+            <div class="container">
                 <div class="my-3">
                     <a href="/reset_password"><%- __("パスワードを忘れた方はこちら") %></a>
                 </div>
@@ -63,21 +56,25 @@
                         <a href="/signup"><%- __("初めてサインインする方はこちら") %></a>
                     <% } %>
                 </div>
-                <div id="firebaseui-auth-container"></div>
+            </div>
+
+            <div class="container">
                 <% if (errorMessage != '') { %>
                     <div class="alert alert-primary my-3" role="alert">
                         <%= errorMessage %>
                     </div>
                 <% } %>
-                <div class="alert alert-secondary p-3">
-                    <p><%- __("とりあえずベータ公開です。") %></p>
-                    <p><%- __("サーバー負荷とかコストの関係で予告なしに閉じるかもしれませんがご了承ください。") %></p>
-                </div>
-                <div class="container">
-                    <a href="/about"><%- __("ご利用について") %></a>
-                </div>
+            </div>
+            <div class="container">
+                <div id="firebaseui-auth-container"></div>
+            </div>
+
+            <div class="container">
+                <a href="/about"><%- __("ご利用について") %></a>
+            </div>
+            <div class="container">
                 <p class="my-3 text-muted"><%- __("©︎ 2021 Shamrock Records, Inc. CC BY 4.0") %></p>
-            </form>
+            </div>
         </div>
     </body>
 </html>

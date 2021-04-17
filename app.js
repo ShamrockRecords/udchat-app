@@ -13,6 +13,7 @@ var profileRouter = require('./routes/profile');
 var chatRouter = require('./routes/chat');
 var localeChangeRouter = require('./routes/localeChange');
 var aboutRouter = require('./routes/about');
+var authDoneRouter = require('./routes/authDone');
 
 require('dotenv').config();
 
@@ -71,6 +72,7 @@ app.use('/profile', profileRouter);
 app.use('/chat', chatRouter);
 app.use('/locale_change', localeChangeRouter);
 app.use('/about', aboutRouter);
+app.use('/auth_done', authDoneRouter);
 
 var firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
