@@ -1,4 +1,25 @@
 {
+	"UD Chat": "UD Chat",
+	"サインイン": "登入。 ",
+	"自動翻訳機能付きグループチャット": "具有自動翻譯功能的群聊",
+	"日本語": "日文",
+	"英語": "英語",
+	"繁体字": "繁體中文",
+	"簡体字": "簡體中文",
+	"驚くほど簡単にグループチャットができます。": "您可以輕鬆使用群聊。",
+	"チャットを作ったらURLをコピーして送るだけ。": "聊天時，只需複制URL並發送即可。",
+	"パスコードの設定もできるので安心！": "您還可以設置密碼，因此可以放心！",
+	"UDはユニバーサルデザインで、誰でも簡単に使えることを目指しています。": "UD具有通用設計，旨在使任何人都易於使用。 ",
+	"メールアドレス": "電子郵件地址",
+	"パスワード": "密碼",
+	"パスワードを忘れた方はこちら": "如果您忘記密碼，請單擊此處",
+	"初めてサインインする方はこちら": "如果您是首次登錄，請單擊此處",
+	"ご利用について": "關於使用",
+	"©︎ 2021 Shamrock Records, Inc": {
+		" CC BY 4": {
+			"0": "©︎ 2021 Shamrock Records, Inc. CC BY 4.0"
+		}
+	},
 	"設定を開く": "Open Settings",
 	"名前": "Your Name",
 	"翻訳言語": "Translate Language",
@@ -9,7 +30,6 @@
 	"送信": "Send",
 	"Enterキーで送信 Shift+Enterで改行": "Press Enter: Send, Press Shift+Enter: Return",
 	"クリップボードにコピーしました。 ": "Copied to clipboard.",
-	"UD Chat": "UD Chat",
 	"トップページ": "Top",
 	"プロフィール": "Profile",
 	"サインアウト": "Sign Out",
@@ -22,7 +42,6 @@
 	"編集": "Edit",
 	"削除": "Delete",
 	"URLをコピーしてチャットをしたい相手に送ったりサイトに掲載してください。": "Please send chat url to your members who you want to chat.",
-	"メールアドレス": "Email address",
 	"更新": "Update",
 	"キャンセル": "Cancel",
 	"必須": "Must",
@@ -30,13 +49,6 @@
 	"作成": "Create",
 	"チャット名": "Chat Name",
 	"パスコード": "Passcode",
-	"サインイン": "Sign In",
-	"驚くほど簡単にグループチャットができます。": "You can create chat group quickly.",
-	"チャットを作ったらURLをコピーして送るだけ。": "After creating chat, you just send URL to your members.",
-	"パスコードの設定もできるので安心！": "Can set passcode will be safer.",
-	"パスワード": "Password",
-	"パスワードを忘れた方はこちら": "If you forgot password, click here.",
-	"初めてサインインする方はこちら": "Sign Up is here.",
 	"とりあえずベータ公開です。": "It's beta version.",
 	"サーバー負荷とかコストの関係で予告なしに閉じるかもしれませんがご了承ください。": "Please understand this site might be stopped due to server loading and cost.",
 	"サインアップ": "Sign Up",
@@ -49,10 +61,6 @@
 	"パスコードを入力してください。": "Enter passcode.",
 	"入室": "Join",
 	"UD Chatにサインイン": "Sign In UD Chat",
-	"ご利用について": "About UD Chat",
-	"日本語": "Japanese",
-	"英語": "English",
-	"自動翻訳機能付きグループチャット": "Group text chat with automatic translation",
 	"注意事項": "Notes",
 	"UD Chatについて": "About UD Chat",
 	"解決できる課題": "Subjects that can be solved",
@@ -72,7 +80,6 @@
 	"ご意見・ご要望は": "Reqest: ",
 	"まで。": "",
 	"開発・企画：Code for Nerima 青木秀仁": "Developing and planning: Code for Nerima / Hidehito Aoki",
-	"UDはユニバーサルデザインで、誰でも簡単に使えることを目指しています。": "UD measn Universal Design. It's one of the way for accessibility.",
 	"このチャットで表示したい名前を入力してください。省略するとプロフィールの名前になります。": "Input your displayed name at this chat. If you omit, profile's name is used.",
 	"チャットに表示される名前を入力してください。サインインをするとプロフィールの名前になります。": "Input your displayed name at this chat. If you sign in, profile's name is used.",
 	"翻訳して表示する言語を選択します。": "You can select translation language.",
@@ -81,11 +88,6 @@
 	"再翻訳して翻訳結果を確認する言語を選択します。": "You can select reverse translation language.",
 	"再翻訳言語": "Re-translate language",
 	"言語設定をリセット": "Reset Languages",
-	"©︎ 2021 Shamrock Records, Inc": {
-		" CC BY 4": {
-			"0": "©︎ 2021 Shamrock Records, Inc. CC BY 4.0"
-		}
-	},
 	"APP_NAME": "UD Chat",
 	"APP_NAME_OPEN": "Open UD Chat",
 	"APP_NAME_SIGN_IN": "Sign In to UD Chat",
@@ -98,7 +100,5 @@
 	"ブラウザ設定": "Browser Setting",
 	"メールアドレスが確認されていません。": "Email is not verified.",
 	"画面が変わらない方はこちら": "Click here if page did not change.",
-	"お待ちください": "Please wait",
-	"繁体字": "Hant Zh",
-	"簡体字": "Hans Zh"
+	"お待ちください": "Please wait"
 }
