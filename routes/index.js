@@ -38,6 +38,7 @@ router.get('/', wrap(async function(req, res, next) {
     }
 
     res.render('index', {
+        lang: res.locale,
         name: name == null ? "" : name,
         rootURL: process.env.ROOT_URL,
         chats: chats,
