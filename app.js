@@ -35,7 +35,7 @@ var i18n = require("i18n");
 // 多言語化の利用設定
 i18n.configure({
   // 利用するlocalesを設定。これが辞書ファイルとひも付きます
-  locales: ['ja', 'en'],
+  locales: ['ja', 'en', 'zh-TW', 'zh-CN'],
   defaultLocale: 'en',
   // 辞書ファイルのありかを指定
   directory: __dirname + "/locales",
