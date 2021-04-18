@@ -48,8 +48,10 @@
 	"パスコードを入力してください。": "Enter passcode.",
 	"参加": "Join",
 	"ご利用について": "About UD Chat",
-	"日本語": "Japanese",
+	"日本語": "日本語",
 	"英語": "English",
+	"繁体字": "繁體中文",
+	"簡体字": "简体中文",
 	"自動翻訳機能付きグループチャット": "Group text chat with automatic translation",
 	"注意事項": "Notes",
 	"UD Chatについて": "About UD Chat",
@@ -96,7 +98,5 @@
 	"ブラウザ設定": "Browser Setting",
 	"メールアドレスが確認されていません。": "Email is not verified.",
 	"画面が変わらない方はこちら": "Click here if page did not change.",
-	"お待ちください": "Please wait",
-	"繁体字": "Hant Zh",
-	"簡体字": "Hans Zh"
+	"お待ちください": "Please wait"
 }
