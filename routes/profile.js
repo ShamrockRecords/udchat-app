@@ -31,6 +31,7 @@ router.get('/', wrap(async function(req, res, next) {
     delete req.session.errorMessage ;
     
     res.render('profile', {
+        lang: res.locale,
         email: currentUser.email,
         data: data,
         errorMessage: errorMessage,

@@ -6,7 +6,8 @@ let router = express.Router();
 router.get('/', function(req, res, next) {
 	let chatId = req.query.chatId ;
 
-	res.render('signup', { 
+	res.render('signup', {
+		lang: res.locale,
 		title: 'サインアップ',
 		email: '',
 		chatId: chatId != undefined ? chatId : '',
@@ -25,7 +26,8 @@ router.post('/', function(req, res, next) {
 				res.redirect("/signin") ;
 			}
 		} else {
-			res.render('signup', { 
+			res.render('signup', {
+				lang: res.locale,
 				title: 'サインアップ',
 				email: email,
 				chatId: chatId != undefined ? chatId : '',

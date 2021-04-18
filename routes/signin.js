@@ -16,7 +16,8 @@ router.get('/', async function(req, res, next) {
 		measurementId: process.env.MEASUREMENT_ID
 	};
 
-	res.render('signin', { 
+	res.render('signin', {
+		lang: res.locale,
 		email: '',
 		chatId: chatId != undefined ? chatId : '',
 		config: config,
@@ -45,7 +46,8 @@ router.post('/', function(req, res, next) {
 				measurementId: process.env.MEASUREMENT_ID
 			};
 
-			res.render('signin', { 
+			res.render('signin', {
+				lang: res.locale,
 				email: email,
 				chatId: chatId != undefined ? chatId : '',
 				config: config,

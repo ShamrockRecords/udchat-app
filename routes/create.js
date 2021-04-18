@@ -22,7 +22,10 @@ router.get('/', wrap(async function(req, res, next) {
         data = doc.data() ;
     }
 
-    res.render('create', {data: data});		 
+    res.render('create', {
+        lang: res.locale,
+        data: data
+    });		 
 })) ;
 
 router.post('/', wrap(async (req, res, next) => {

@@ -13,7 +13,10 @@ router.get('/', async function(req, res, next) {
         measurementId: process.env.MEASUREMENT_ID
     };
 
-    res.render('authDone', {config: config});		 
+    res.render('authDone', {
+        lang: res.locale,
+        config: config
+    });		 
 }) ;
 
 router.get('/verify', async function(req, res, next) {
