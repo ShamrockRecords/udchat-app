@@ -13,7 +13,7 @@
 			// 選択しているテキストをクリップボードにコピーする
 			document.execCommand("Copy");
 			// コピーをお知らせする
-			alert('<%- __("クリップボードにコピーしました。 ") %>');
+			alert('<%- __("クリップボードにコピーしました。") %>');
 		}
 	  </script>
 	  <style>
@@ -52,7 +52,7 @@
 						<td class="h3"><strong><%= chat.name %></strong></td>
 
 						<% if (chat.passcode != undefined && chat.passcode != '') { %>
-							<td><%- __("パスコード：") %> <%= chat.passcode %></td>
+							<td class="text-right"><%- __("パスコード：") %> <%= chat.passcode %></td>
 						<% } else { %>
 							<td></td>
 						<% } %>
