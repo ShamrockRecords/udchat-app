@@ -14,7 +14,7 @@
 		<div class="container p-3">
 			<form method="POST" action="/create">
 				<div class="form-group">
-					<label for="name"><%- __("チャット名") %><span class="badge badge-danger"><%- __("必須") %></span></label>
+					<label for="name"><%- __("チャット名") %><span class="badge badge-danger m-2"><%- __("必須") %></span></label>
 					<input required type="text" maxlength="30" class="form-control" id="name" name="name" value="<%= data.name %>" aria-describedby="nameHelp">
 				</div>
 				<div class="form-group">
@@ -25,6 +25,7 @@
 				<div class="form-group">
 					<label for="name"><%- __("パスコード") %><span class="badge badge-danger"></span></label>
 					<input autocomplete="off" type="text" maxlength="30" class="form-control" id="passcode" name="passcode" value="<%= data.passcode %>" aria-describedby="passcodeHelp">
+					<small id="passcodeHelp" class="form-text text-muted"><%- __("チャットに参加するときに必要なパスコードを設定します。省略することもできます。") %></small>
 				</div>
 				<% if (data.chatId != undefined) { %>
 					<input type="hidden" name="chatId" value="<%= data.chatId %>">
