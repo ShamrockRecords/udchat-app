@@ -29,7 +29,7 @@
 		<div class="container p-3">
 			<form method="POST" action="/chat/passcode">
 				<div class="form-group">
-					<label for="passcode"><%- __("名前") %></label>
+					<label for="displayName"><%- __("名前") %></label>
 					<input required type="text" maxlength="30" class="form-control" id="displayName" name="displayName" value="<%= displayName %>" aria-describedby="displayNameHelp">
 					<small id="displayNameHelp" class="form-text text-muted"><%- __("チャットに表示される名前を入力してください。サインインをするとプロフィールの名前になります。") %></small>
 				</div>
