@@ -15,6 +15,13 @@
 			// コピーをお知らせする
 			alert('<%- __("クリップボードにコピーしました。") %>');
 		}
+
+		function onClickSaveContentsButton(chatId) {
+			let date = new Date() ;
+
+			location.href='/download?chatId=' + chatId + '&to=' + date.getTimezoneOffset() ;
+		}
+
 	  </script>
 	  <style>
 		  #command {
@@ -75,7 +82,7 @@
 						<td class="small" colspan="2">
 							<div class="row">
 								<div class="col-auto">
-									<button class="btn btn-info" onclick="location.href='/download?chatId=<%= chat.chatId %>'"><%- __("内容を保存") %></button>
+									<button class="btn btn-info" onClick="onClickSaveContentsButton('<%= chat.chatId %>')"><%- __("内容を保存") %></button>
 								</div>
 								<div class="col">
 									<%- __("3日前からの記録をCSVデータでダウンロードします。") %>

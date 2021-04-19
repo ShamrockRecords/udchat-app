@@ -93,6 +93,7 @@ router.get('/download', wrap(async function(req, res, next) {
         }
     }
     
+    let reqestedTimezoneOffset = req.query.to ;
     let targetDate = new Date() ;
 
     targetDate.setDate(targetDate.getDate() - 3) ;
@@ -110,6 +111,8 @@ router.get('/download', wrap(async function(req, res, next) {
         let command = doc.data() ;
 
         let date = new Date(command.timestamp.toDate().toUTCString()) ;
+
+        date.setHours(date.getHours() + (date.getTimezoneOffset() - reqestedTimezoneOffset)/60) ;
 
         let line = '"' + date.toLocaleString('ja-JP') + '"' + ',' + command.name + ',' + command.message + "\r\n" ;
 
