@@ -54,8 +54,10 @@ class socketWrapper {
                 command["messageId"] = uuid.v4() ;
                 command["timestamp"] = new Date() ;
 
-                await admin.firestore().collection("chat").doc(command.requestId).collection("messages").doc(command.messageId).set(command) ;
-
+                if (command.method != 'status') {
+                    await admin.firestore().collection("chat").doc(command.requestId).collection("messages").doc(command.messageId).set(command) ;
+                }
+                
                 try {
                     command.timestamp = command.timestamp.toDate().toUTCString() ;
                 } catch(e) {
@@ -76,7 +78,8 @@ class socketWrapper {
                     command["messageId"] = uuid.v4() ;
                     command["timestamp"] = new Date() ;
                     command["method"] = 'information' ;
-
+                    command["param"] = 'left' ;
+   
                     await admin.firestore().collection("chat").doc(command.requestId).collection("messages").doc(command.messageId).set(command) ;
 
                     try {

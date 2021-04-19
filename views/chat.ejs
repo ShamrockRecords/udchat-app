@@ -72,6 +72,14 @@
 				color: white;
 			}
 
+			#members {
+				z-index: 2;
+				position: absolute; 
+				background-color:gray;
+				color: white;
+				opacity: 0.55;
+			}
+		
 			.modal{
 				display: none;
 				height: 100vh;
@@ -105,19 +113,8 @@
 			let isBottom = true ;
 			let becameBackground = false ;
 			let isSpeechRecognizing = false ;
-
-			function escapeHTML(string){
-				return string.replace(/\&/g, '&amp;')
-				.replace(/\</g, '&lt;')
-				.replace(/\>/g, '&gt;')
-				.replace(/\"/g, '&quot;')
-				.replace(/\'/g, '&#x27');
-			}
-
-			function unescapeHTML(escapedHtml) {
-				const doc = new DOMParser().parseFromString(escapedHtml, 'text/html');
-				return doc.documentElement.textContent;
-			}
+			let uidMap = {} ;
+			let uidArray = [] ;
 
 			// When message came.
 			socket.on('message', async (message) => {
@@ -135,6 +132,7 @@
 							language: $('#inputLanguages option:selected').val(),
 							message: "<%= name %>" + '<%- __("が参加しました。") %>',
 							method: 'information',
+							param: 'joined'
 						} ;
 
 						command.name = unescapeHTML(command.name) ;
@@ -162,45 +160,51 @@
 
 					let element = $('<div class="p-3" style="width: 100%;">') ;
 					
-					if ("<%= uid %>" == command.uid) {
-						element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
+					if (command.method == 'message' || command.method == 'information') {
+						if ("<%= uid %>" == command.uid) {
+							element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
 
-						if (command.method == 'information') {
-							element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
+							if (command.method == 'information') {
+								element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
+							} else {
+								element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(command.message)) ;
+							
+								if ((command.translation != undefined && command.translation != '') && 
+									(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
+									element.append($('<div class="right messageRight rounded-pill reversetTranslation px-4 py-2">').html('<span style="font-size: small;">' + command.translation + '</span>' + '<br />' + command.reverseTranslation)) ;
+								}
+							}
 						} else {
-							element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(command.message)) ;
-						
-							if ((command.translation != undefined && command.translation != '') && 
-								(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
-								element.append($('<div class="right messageRight rounded-pill reversetTranslation px-4 py-2">').html('<span style="font-size: small;">' + command.translation + '</span>' + '<br />' + command.reverseTranslation)) ;
+							element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
+
+							if (command.method == 'information') {
+								element.append($('<div class="left small">').html(command.message)) ;
+								
+								updateMemberList(command) ;
+							} else {
+								element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(command.message)) ;
+							}
+
+							let translation = "" ;
+							
+							if (command.language != undefined && command.needsTranslating) {
+								await translate("<%= apiKey %>", command.message, command.language, $('#languages option:selected').val(), (t, from) => {
+									translation = t ;
+									if (from != undefined) {
+										command.language = from ;
+									}
+								}) ;
+							}
+
+							if (translation != "" && command.language != $('#languages option:selected').val()) {
+								element.append($('<div class="left messageLeft rounded-pill translation px-4 py-2">').html(translation)) ;
 							}
 						}
-					} else {
-						element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
 
-						if (command.method == 'information') {
-							element.append($('<div class="left px-4 py-2 small">').html(command.message)) ;
-						} else {
-							element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(command.message)) ;
-						}
-
-						let translation = "" ;
-						 
-						if (command.language != undefined && command.needsTranslating) {
-							await translate("<%= apiKey %>", command.message, command.language, $('#languages option:selected').val(), (t, from) => {
-								translation = t ;
-								if (from != undefined) {
-									command.language = from ;
-								}
-							}) ;
-						}
-
-						if (translation != "" && command.language != $('#languages option:selected').val()) {
-							element.append($('<div class="left messageLeft rounded-pill translation px-4 py-2">').html(translation)) ;
-						}
+						$('#messages').append(element);
+					} else if (command.method == 'status') {
+						updateMemberList(command) ;
 					}
-
-					$('#messages').append(element);
 				}
 				
 				function scrollToEnd() {
@@ -225,23 +229,88 @@
 
 				let lastCommand = commands[commands.length-1] ;
 
-				if (isBottom || "<%= uid %>" == lastCommand.uid) {
-					scrollToEnd() ;
+				if (lastCommand.method != 'status') {
+					if (isBottom || "<%= uid %>" == lastCommand.uid) {
+						scrollToEnd() ;
 
-					if (becameBackground) {
+						if (becameBackground) {
+							sendNewMessageNotification(lastCommand.message) ;
+						}
+					} else {
 						sendNewMessageNotification(lastCommand.message) ;
-					}
-				} else {
-					
-					sendNewMessageNotification(lastCommand.message) ;
 
-					$('#notification').show() ;
-					$('#notification').offset({ 
-						top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
-						left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
-					});
+						$('#notification').prop('hidden', false) ;
+						$('#notification').show() ;
+						$('#notification').offset({ 
+							top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
+							left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
+						});
+					}
 				}
 			});
+
+			function updateMemberList(command) {
+				if (command.param == 'joined') {
+					if (uidMap[command.uid] == undefined) {
+						uidMap[command.uid] = command ;
+						uidArray.unshift(command.uid) ;
+					} else {
+						let index = uidArray.indexOf(command.uid) ;
+
+						if (index > 0) {
+							uidArray.splice(index, 1) ;
+							uidArray.unshift(command.uid) ;
+						}
+					}
+				} else if (command.param == 'left') {
+					if (uidMap[command.uid] != undefined) {
+						delete uidMap[command.uid] ;
+
+						let index = uidArray.indexOf(command.uid) ;
+
+						if (index >= 0) {
+							uidArray.splice(index, 1) ;
+						}
+					}
+				} else if (command.param == 'focused') {
+					if (uidMap[command.uid] != undefined) {
+						uidMap[command.uid] = command ;
+					}
+				} else if (command.param == 'unfocused') {
+					if (uidMap[command.uid] != undefined) {
+						uidMap[command.uid] = command ;
+					}
+				} else {
+					return ;
+				}
+
+				$('#members').prop('hidden', false) ;
+				$('#members').offset({ 
+					top: 10,
+					left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
+				});
+
+				$('#members').empty() ;
+					
+				for (let key in uidArray) {
+					let command = uidMap[uidArray[key]] ;
+
+					if (command.param == 'focused') {
+						$('#members').append($('<div class="right p-1 small" id="' + command.uid + '">').html("<strong>" + command.name + "</strong>")) ;
+					} else {
+						$('#members').append($('<div class="right p-1 small" id="' + command.uid + '">').text(command.name)) ;
+					}
+				}
+
+				$('#members').offset({ 
+						top: 10,
+						left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
+				});
+				
+				if (Object.keys(uidMap).length == 0) {
+					$('#members').prop('hidden', true) ;
+				}
+			}
 
 			// Window loaded.
 			$(window).on('load', async function() {				
@@ -261,6 +330,16 @@
 
 				function resize() {
 					$('#messages').height($('body').height() - $('#operation').height()) ;
+
+					$('#members').offset({ 
+						top: 10,
+						left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
+					});
+
+					$('#notification').offset({ 
+						top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
+						left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
+					});
 				}
 				
 				resize() ;
@@ -410,13 +489,29 @@
 
 				$(window).on('focus', () => {
 					becameBackground = false ;
+					sendStatus('focused') ;
 				}) ;
 
 				$(window).on('blur', () => {
 					becameBackground = true ;
+					sendStatus('unfocused') ;
 				}) ;
 			}) ;
 			
+			function sendStatus(status) {
+				let command = {
+					requestId: "<%= requestId %>",
+					uid: "<%= uid %>",
+					name: $('#displayName').val(),
+					language: '',
+					message: '',
+					method: 'status',
+					param: status
+				} ;
+
+				socket.send(JSON.stringify(command)) ;
+			}
+
 			// keypress detected.
 			$(document).keypress(function(e) {
 				if (!event.shiftKey &&　((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13))) {
@@ -474,7 +569,8 @@
 		<div id='main'>
 			<div class="top p-1" id="messages"></div>
 
-			<div class="rounded text-center p-1" id="notification"><%- __("新しいメッセージがあります") %></div>
+			<div class="rounded text-center p-1" id="notification" hidden><%- __("新しいメッセージがあります") %></div>
+			<div class="rounded text-center p-1" id="members" hidden></div>
 			
 			<div class="bottom p-1" id="operation">
 				<div class="row">
