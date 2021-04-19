@@ -73,7 +73,7 @@
 	"まで。": "",
 	"開発・企画：Code for Nerima 青木秀仁": "Developing and planning: Code for Nerima / Hidehito Aoki",
 	"UDはユニバーサルデザインで、誰でも簡単に使えることを目指しています。": "UD measn Universal Design. It's one of the way for accessibility.",
-	"チャットに表示される名前を入力してください。。省略するとプロフィールの名前になります。": "Input your displayed name at this chat. If you omit, profile's name is used.",
+	"チャットに表示される名前を入力してください。省略するとプロフィールの名前になります。": "Input your displayed name at this chat. If you omit, profile's name is used.",
 	"チャットに表示される名前を入力してください。サインインをするとプロフィールの名前になります。": "Input your displayed name at this chat. If you sign in, profile's name is used.",
 	"翻訳して表示する言語を選択します。": "You can select translation language.",
 	"自分が入力する言語を選択します。": "You can select your input language if you want to set except automatic detection.",
@@ -99,5 +99,7 @@
 	"メールアドレスが確認されていません。": "Email is not verified.",
 	"画面が変わらない方はこちら": "Click here if page did not change.",
 	"お待ちください": "Please wait",
-	"チャットに表示される名前を入力してください。省略するとプロフィールの名前になります。": "チャットに表示される名前を入力してください。省略するとプロフィールの名前になります。"
+	"内容を保存": "Save Contents",
+	"3日前からの記録をCSVデータでダウンロードします。": "Download the chat contents from 3 days ago.",
+	"チャットに参加するときに必要なパスコードを設定します。省略することもできます。": "Set the passcode for joining the chat. You can ommit it."
 }
