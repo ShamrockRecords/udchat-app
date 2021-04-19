@@ -109,13 +109,9 @@ router.get('/download', wrap(async function(req, res, next) {
         let doc = snapshot.docs[key] ;
         let command = doc.data() ;
 
-        try {
-            command.timestamp = command.timestamp.toDate().toUTCString() ;
-        } catch(e) {
+        let date = new Date(command.timestamp.toDate().toUTCString()) ;
 
-        }
-
-        let line = '"' + command.timestamp + '"' + ',' + command.name + ',' + command.message + "\r\n" ;
+        let line = '"' + date.toLocaleString('ja-JP') + '"' + ',' + command.name + ',' + command.message + "\r\n" ;
 
         res.write(line) ;
     }
