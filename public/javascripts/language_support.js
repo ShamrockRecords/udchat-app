@@ -57,7 +57,7 @@ async function supportedLanguages(apiKey) {
     let body = {"target": getDefaultLanguage()} ;
 
     let data = await fetch(URL, {method: "POST", body: JSON.stringify(body)}).then(response => response.json()) ;
-    
+       
     return data.data.languages ;
 }
 
@@ -260,7 +260,6 @@ function getSupportedSpeechRecognitionLocales() {
 
         return supportedLocales ;
     } catch (e) {
-        console.log(e) ;
         return [] ;
     }
 }

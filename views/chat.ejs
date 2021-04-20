@@ -303,7 +303,6 @@
 
 				for (let key in uidArray) {
 					let command = uidMap[uidArray[key]] ;
-					console.log(command.param);
 
 					if (command.param == 'focused') {
 						$('#members').append($('<div class="p-1 small" id="' + command.uid + '">').html('<strong>' + command.name + '<i class="far fa-eye m-1"></i></strong>')) ;
