@@ -300,6 +300,7 @@
 					
 				for (let key in uidArray) {
 					let command = uidMap[uidArray[key]] ;
+					console.log(command.param);
 
 					if (command.param == 'focused') {
 						$('#members').append($('<div class="right p-1 small" id="' + command.uid + '">').html('<strong><i class="far fa-eye m-1"></i>' + command.name + "</strong>")) ;
@@ -506,7 +507,7 @@
 						reverseTranslation: reverseTranslation,
 					} ;
 
-					sendCommands(socket, [command]) ;
+					sendCommands(socket, [command, createStatusCommand('focused')]) ;
 				}
 			}
 
