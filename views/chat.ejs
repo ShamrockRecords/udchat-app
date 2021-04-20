@@ -125,21 +125,24 @@
 					let timestamp = command.timestamp ;
 
 					if (command.method == 'requestConnecting') {
-						let command = {
-							requestId: "<%= requestId %>",
-							uid: "<%= uid %>",
-							name: "<%= name %>",
-							language: $('#inputLanguages option:selected').val(),
-							message: "<%= name %>" + '<%- __("が参加しました。") %>',
-							method: 'information',
-							param: 'joined'
-						} ;
+						let commands = [] ;
 
-						command.name = unescapeHTML(command.name) ;
-						command.message = unescapeHTML(command.message) ;
+						{
+							let command = {
+								requestId: "<%= requestId %>",
+								uid: "<%= uid %>",
+								name: "<%= name %>",
+								language: $('#inputLanguages option:selected').val(),
+								message: "<%= name %>" + '<%- __("が参加しました。") %>',
+								method: 'information',
+							} ;
 
-						socket.send(JSON.stringify(command)) ;
+							commands.push(command) ;
+							commands.push(createStatusCommand('joined')) ;
+						}
 
+						sendCommands(socket, commands) ;
+					
 						continue ;
 					}
 
@@ -179,8 +182,6 @@
 
 							if (command.method == 'information') {
 								element.append($('<div class="left small">').html(command.message)) ;
-								
-								updateMemberList(command) ;
 							} else {
 								element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(command.message)) ;
 							}
@@ -206,48 +207,53 @@
 						updateMemberList(command) ;
 					}
 				}
-				
-				function scrollToEnd() {
-					$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
-					$('#notification').hide() ;
-				}
 
-				function sendNewMessageNotification(message) {
-					if (Push.Permission.has()) {
-						Push.create('<%- __("APP_NAME") %> - <%= title %>', {
-						　　body: message,
-						　　icon: '',
-						　　timeout: 10000,
-						　　onClick: function() {
-							　　scrollToEnd() ;
-								$(window).focus() ;
-								this.close();
-						　　}
-						});
-					}
-				}
+				// If commands were included not "status", do automatic scroll or show notification.
+				for (let key in commands) {
+					let commnad = commands[key] ;
 
-				let lastCommand = commands[commands.length-1] ;
+					if (commnad.method != 'status') {
+						if (isBottom || "<%= uid %>" == commnad.uid) {
+							scrollToEnd() ;
 
-				if (lastCommand.method != 'status') {
-					if (isBottom || "<%= uid %>" == lastCommand.uid) {
-						scrollToEnd() ;
+							if (becameBackground) {
+								sendNewMessageNotification(commnad.message) ;
+							}
+						} else {
+							sendNewMessageNotification(commnad.message) ;
 
-						if (becameBackground) {
-							sendNewMessageNotification(lastCommand.message) ;
+							$('#notification').prop('hidden', false) ;
+							$('#notification').show() ;
+							$('#notification').offset({ 
+								top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
+								left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
+							});
 						}
-					} else {
-						sendNewMessageNotification(lastCommand.message) ;
 
-						$('#notification').prop('hidden', false) ;
-						$('#notification').show() ;
-						$('#notification').offset({ 
-							top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
-							left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
-						});
+						break ;
 					}
 				}
 			});
+
+			function scrollToEnd() {
+				$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
+				$('#notification').hide() ;
+			}
+
+			function sendNewMessageNotification(message) {
+				if (Push.Permission.has()) {
+					Push.create('<%- __("APP_NAME") %> - <%= title %>', {
+					　　body: message,
+					　　icon: '',
+					　　timeout: 10000,
+					　　onClick: function() {
+						　　scrollToEnd() ;
+							$(window).focus() ;
+							this.close();
+					　　}
+					});
+				}
+			}
 
 			function updateMemberList(command) {
 				if (command.param == 'joined') {
@@ -296,20 +302,45 @@
 					let command = uidMap[uidArray[key]] ;
 
 					if (command.param == 'focused') {
-						$('#members').append($('<div class="right p-1 small" id="' + command.uid + '">').html("<strong>" + command.name + "</strong>")) ;
+						$('#members').append($('<div class="right p-1 small" id="' + command.uid + '">').html('<strong><i class="far fa-eye m-1"></i>' + command.name + "</strong>")) ;
 					} else {
 						$('#members').append($('<div class="right p-1 small" id="' + command.uid + '">').text(command.name)) ;
 					}
 				}
 
 				$('#members').offset({ 
-						top: 10,
-						left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
+					top: 10,
+					left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
 				});
 				
 				if (Object.keys(uidMap).length == 0) {
 					$('#members').prop('hidden', true) ;
 				}
+			}
+
+			//
+			function sendCommands(socket, commands) {
+				for (let key in commands) {
+					let command = commands[key] ;
+
+					command.name = unescapeHTML(command.name) ;
+					command.message = unescapeHTML(command.message) ;
+				}
+
+				socket.send(JSON.stringify(commands)) ;
+			}
+
+			//
+			function createStatusCommand(status) {
+				return {
+					requestId: "<%= requestId %>",
+					uid: "<%= uid %>",
+					name: $('#displayName').val(),
+					language: '',
+					message: '',
+					method: 'status',
+					param: status
+				} ;
 			}
 
 			// Window loaded.
@@ -327,83 +358,35 @@
 						isBottom = false ;
 					}
 				}) ;
-
-				function resize() {
-					$('#messages').height($('body').height() - $('#operation').height()) ;
-
-					$('#members').offset({ 
-						top: 10,
-						left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
-					});
-
-					$('#notification').offset({ 
-						top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
-						left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
-					});
-				}
 				
 				resize() ;
-
-				$(window).on('resize', function() {
-					resize() ;					
-				}) ;
 
 				$('#notification').hide() ;
 
 				let languages = await supportedLanguages("<%= apiKey %>") ;
 				let locales = getSupportedSpeechRecognitionLocales() ;
 
-				function initLauguageSelect(tag, defaultLanguage, defaultOption, languages) {
-					
-					if (localStorage.getItem(tag)) {
-						defaultLanguage = localStorage.getItem(tag) ;
-					}
-
-					if (defaultOption != '') {
-						let option = $('<option>') ;
-
-						option.attr("value", '') ;
-						option.text(defaultOption) ;
-						$('#' + tag).append(option) ;
-
-						if (defaultLanguage == "") {
-							option.prop('selected', true) ;
-						}
-					}
-
-					for (let key in languages) {
-						let option = $('<option>') ;
-
-						option.attr("value", languages[key].language) ;
-
-						if (defaultLanguage == languages[key].language) {
-							option.prop('selected', true) ;
-						}
-
-						option.text(languages[key].name) ;
-
-						$('#' +tag).append(option) ;
-					}
-
-					$('#' +tag).change(() => {
-						localStorage.setItem(tag, $('#' +tag + ' option:selected').val());
-					}) ;
-				}
-
 				initLauguageSelect('languages', getDefaultLanguage(), '', languages) ;
 				initLauguageSelect('inputLanguages', '', '<%- __("自動判別") %>', languages) ;
 				initLauguageSelect('reverseTranslationLanguages', '', '<%- __("なし") %>', languages) ;
 				initLauguageSelect('speechRecognitionLocales', '', '<%- __("ブラウザ設定") %>', locales) ;
 				
-				socket.send(JSON.stringify({
-					requestId: "<%= requestId %>",
-					uid: "<%= uid %>",
-					name: "<%= name %>",
-					language: '',
-					message: '',
-					method:'requestConnecting',
-				})) ;
+				{
+					let command = {
+						requestId: "<%= requestId %>",
+						uid: "<%= uid %>",
+						name: "<%= name %>",
+						language: '',
+						message: '',
+						method:'requestConnecting',
+					} ;
 
+					sendCommands(socket, [command]) ;
+				}
+
+				initSpeechRecognition() ;
+
+				// resetTranslationSettingsButton was clicked.
 				$('#resetTranslationSettingsButton').on('click', () => {
 					$('#languages').val(getDefaultLanguage()) ;
 					$('#inputLanguages').val('') ;
@@ -416,11 +399,13 @@
 					localStorage.setItem('speechRecognitionLocales', $('#speechRecognitionLocales' + ' option:selected').val());
 				}) ;
 
+				// notification label was clicked.
 				$('#notification').on('click', () => {
 					$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
 					$('#notification').hide() ;
 				}) ;
 
+				// settingButton was clicked.
 				$('#settingButton').on('click', () => {
 					setTimeout(() => {
 						resize() ;
@@ -429,6 +414,139 @@
 					}, 500);
 				}) ;
 
+				// sendButton was clicked.
+				$('#sendButton').on('click', () => {
+					let text = $('#message').val() ;
+
+					$('#message').val('') ;
+
+					send(text) ;
+				}) ;
+
+				// When user actived.
+				$(window).on('focus', () => {
+					becameBackground = false ;
+					sendCommands(socket, [createStatusCommand('focused')]) ;
+				}) ;
+
+				// When user unactived.
+				$(window).on('blur', () => {
+					becameBackground = true ;
+					sendCommands(socket, [createStatusCommand('unfocused')]) ;
+				}) ;
+			}) ;
+
+			// Window size changed.
+			$(window).on('resize', function() {
+				resize() ;					
+			}) ;
+
+			// keypress detected.
+			$(document).keypress(function(e) {
+				if (!event.shiftKey &&　((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13))) {
+					let text = $('#message').val() ;
+
+					$('#message').val('') ;
+
+					send(text) ;
+					e.preventDefault();
+				}
+			}) ;
+		
+			function resize() {
+				$('#messages').height($('body').height() - $('#operation').height()) ;
+
+				$('#members').offset({ 
+					top: 10,
+					left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
+				});
+
+				$('#notification').offset({ 
+					top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
+					left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
+				});
+			}
+
+			// send message
+			async function send(text) {
+				if (text != '') {
+					let selectedInputLanguage = $('#inputLanguages option:selected').val() ;
+
+					if (selectedInputLanguage == '') {
+						await detect("<%= apiKey %>", text, (language) => {
+							selectedInputLanguage = language ;
+						}) ;
+					}
+
+					let selectedReverseTranslationLanguage = $('#reverseTranslationLanguages option:selected').val() ;
+					let translation = '' ;
+					let reverseTranslation = '' ;
+
+					if (selectedReverseTranslationLanguage != '' &&
+						selectedInputLanguage != selectedReverseTranslationLanguage) {
+				
+						await translate("<%= apiKey %>", text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
+							translation = unescapeHTML(t) ;
+						}) ;
+
+						await translate("<%= apiKey %>", translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
+							reverseTranslation = unescapeHTML(t) ;
+						}) ;
+					}
+
+					let command = {
+						requestId: "<%= requestId %>",
+						uid: "<%= uid %>",
+						name: $('#displayName').val(),
+						language: selectedInputLanguage,
+						message: text,
+						method:'message',
+						translation: translation,
+						translationLanguage: selectedReverseTranslationLanguage,
+						reverseTranslation: reverseTranslation,
+					} ;
+
+					sendCommands(socket, [command]) ;
+				}
+			}
+
+			function initLauguageSelect(tag, defaultLanguage, defaultOption, languages) {					
+				if (localStorage.getItem(tag)) {
+					defaultLanguage = localStorage.getItem(tag) ;
+				}
+
+				if (defaultOption != '') {
+					let option = $('<option>') ;
+
+					option.attr("value", '') ;
+					option.text(defaultOption) ;
+					$('#' + tag).append(option) ;
+
+					if (defaultLanguage == "") {
+						option.prop('selected', true) ;
+					}
+				}
+
+				for (let key in languages) {
+					let option = $('<option>') ;
+
+					option.attr("value", languages[key].language) ;
+
+					if (defaultLanguage == languages[key].language) {
+						option.prop('selected', true) ;
+					}
+
+					option.text(languages[key].name) ;
+
+					$('#' +tag).append(option) ;
+				}
+
+				$('#' +tag).change(() => {
+					localStorage.setItem(tag, $('#' +tag + ' option:selected').val());
+				}) ;
+			}
+
+			function initSpeechRecognition() {
 				try {
 					SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
 
@@ -477,91 +595,6 @@
 				} catch (e) {
 					$('#speechRecongizerButtonCol').prop('hidden', true) ;
 					$('#speechRecognitionLocales').prop("disabled", true);
-				}
-
-				$('#sendButton').on('click', () => {
-					let text = $('#message').val() ;
-
-					$('#message').val('') ;
-
-					send(text) ;
-				}) ;
-
-				$(window).on('focus', () => {
-					becameBackground = false ;
-					sendStatus('focused') ;
-				}) ;
-
-				$(window).on('blur', () => {
-					becameBackground = true ;
-					sendStatus('unfocused') ;
-				}) ;
-			}) ;
-			
-			function sendStatus(status) {
-				let command = {
-					requestId: "<%= requestId %>",
-					uid: "<%= uid %>",
-					name: $('#displayName').val(),
-					language: '',
-					message: '',
-					method: 'status',
-					param: status
-				} ;
-
-				socket.send(JSON.stringify(command)) ;
-			}
-
-			// keypress detected.
-			$(document).keypress(function(e) {
-				if (!event.shiftKey &&　((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13))) {
-					let text = $('#message').val() ;
-
-					$('#message').val('') ;
-
-					send(text) ;
-					e.preventDefault();
-				}
-			}) ;
-
-			// send message
-			async function send(text) {
-				if (text != '') {
-					let selectedInputLanguage = $('#inputLanguages option:selected').val() ;
-
-					if (selectedInputLanguage == '') {
-						await detect("<%= apiKey %>", text, (language) => {
-							selectedInputLanguage = language ;
-						}) ;
-					}
-
-					let selectedReverseTranslationLanguage = $('#reverseTranslationLanguages option:selected').val() ;
-					let translation = '' ;
-					let reverseTranslation = '' ;
-
-					if (selectedReverseTranslationLanguage != '' &&
-						selectedInputLanguage != selectedReverseTranslationLanguage) {
-				
-						await translate("<%= apiKey %>", text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
-							translation = unescapeHTML(t) ;
-						}) ;
-
-						await translate("<%= apiKey %>", translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
-							reverseTranslation = unescapeHTML(t) ;
-						}) ;
-					}
-
-					socket.send(JSON.stringify({
-						requestId: "<%= requestId %>",
-						uid: "<%= uid %>",
-						name: $('#displayName').val(),
-						language: selectedInputLanguage,
-						message: text,
-						method:'message',
-						translation: translation,
-						translationLanguage: selectedReverseTranslationLanguage,
-						reverseTranslation: reverseTranslation,
-					})) ;
 				}
 			}
 		</script>
