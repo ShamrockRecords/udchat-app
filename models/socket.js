@@ -8,6 +8,7 @@ class socketWrapper {
     constructor() {
         this.socketsGroup = {} ;
         this.socketsInstances = {} ;
+        this.socketsLastStatus = {} ;
     }
 
     init(server) {
@@ -53,8 +54,8 @@ class socketWrapper {
                             let ids = await io.in(command.requestId).allSockets() ;
 
                             for (let socketId of ids) {
-                                let command = this.socketsInstances[socketId] ;
-                                commands.push(this.createStatusCommand('joined', command)) ;
+                                let command = this.socketsLastStatus[socketId] ;
+                                commands.push(command) ;
                             }
 
                             io.to(socket.id).emit('message', JSON.stringify(commands));
@@ -68,6 +69,8 @@ class socketWrapper {
 
                         if (command.method != 'status') {
                             await admin.firestore().collection("chat").doc(command.requestId).collection("messages").doc(command.messageId).set(command) ;
+                        } else {
+                            this.socketsLastStatus[socket.id] = command ;
                         }
                         
                         try {
@@ -125,6 +128,7 @@ class socketWrapper {
                     await io.to(lastCommand.requestId).emit("message", JSON.stringify(commands)); 
 
                     delete  this.socketsInstances[socket.id] ;
+                    delete  this.socketsLastStatus[socket.id] ;
                 }
             });
         });

@@ -280,11 +280,17 @@
 						}
 					}
 				} else if (command.param == 'focused') {
-					if (uidMap[command.uid] != undefined) {
+					if (uidMap[command.uid] == undefined) {
+						uidMap[command.uid] = command ;
+						uidArray.unshift(command.uid) ;
+					} else {
 						uidMap[command.uid] = command ;
 					}
 				} else if (command.param == 'unfocused') {
-					if (uidMap[command.uid] != undefined) {
+					if (uidMap[command.uid] == undefined) {
+						uidMap[command.uid] = command ;
+						uidArray.unshift(command.uid) ;
+					} else {
 						uidMap[command.uid] = command ;
 					}
 				} else {
