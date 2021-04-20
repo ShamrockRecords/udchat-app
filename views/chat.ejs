@@ -225,10 +225,8 @@
 
 							$('#notification').prop('hidden', false) ;
 							$('#notification').show() ;
-							$('#notification').offset({ 
-								top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
-								left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
-							});
+							
+							offsetNotification() ;
 						}
 
 						break ;
@@ -297,11 +295,7 @@
 					return ;
 				}
 
-				$('#members').prop('hidden', false) ;
-				$('#members').offset({ 
-					top: 10,
-					left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
-				});
+				offsetMemebers() ;
 
 				$('#members').empty() ;
 				
@@ -328,10 +322,7 @@
 					$('#members').append($('<div class="p-1 small">').text('<%- __("他") %>' + (uidArray.length - count) + '<%- __("人参加しています") %>')) ;
 				}
 
-				$('#members').offset({ 
-					top: 10,
-					left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
-				});
+				offsetMemebers() ;
 				
 				if (Object.keys(uidMap).length == 0) {
 					$('#members').prop('hidden', true) ;
@@ -443,6 +434,27 @@
 					send(text) ;
 				}) ;
 
+				// showMembersButton was clicked.
+				$('#showMembersButton').on('click', () => {
+					if ($('#members').prop('hidden')) {
+						$('#members').prop('hidden', false) ;
+
+						offsetMemebers() ;
+						
+						localStorage.setItem('showMembers', true) ;
+					} else {
+						$('#members').prop('hidden', true) ;
+
+						localStorage.setItem('showMembers', false) ;
+					}
+				}) ;
+
+				if (localStorage.getItem('showMembers')) {
+					$('#members').prop('hidden', false) ;
+
+					offsetMemebers() ;
+				}
+				
 				// When user actived.
 				$(window).on('focus', () => {
 					becameBackground = false ;
@@ -473,18 +485,26 @@
 				}
 			}) ;
 		
-			function resize() {
-				$('#messages').height($('body').height() - $('#operation').height()) ;
-
+			function offsetMemebers() {
 				$('#members').offset({ 
-					top: 10,
+						top: 10,
 					left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
 				});
+			}
 
+			function offsetNotification() {
 				$('#notification').offset({ 
 					top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
 					left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
 				});
+			}
+
+			function resize() {
+				$('#messages').height($('body').height() - $('#operation').height()) ;
+
+				offsetMemebers() ;
+
+				offsetNotification() ;
 			}
 
 			// send message
@@ -644,6 +664,7 @@
 							});
 						</script>
 						<button class="js-modal-open btn btn-info btn-sm" type="button"><%- __("バーコード") %></button>
+						<button class="btn btn-info btn-sm" type="button" id="showMembersButton"><%- __("参加者リスト") %></button>
 						<div class="modal js-modal">
 							<div class="modal__bg js-modal-close"></div>
 							<div class="modal__content py-3">
@@ -664,13 +685,6 @@
 								</div>								
 							</div><!--modal__inner-->
 						</div><!--modal-->
-					</div>
-					<div class="col align-self-center">
-						<% if (isAlreadySignIn) { %>
-							<div class="text-right small"><%= title %><br /><a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
-						<% } else { %>
-							<div class="text-right small"><%= title %><br /><a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
-						<% } %>
 					</div>
 				</div>
 				<div id="sample" class="collapse">
@@ -714,6 +728,15 @@
 									</div>
 									<div class="col align-self-center text-center">
 										<button class="btn btn-danger btn-sm" type="button" id="resetTranslationSettingsButton"><%- __("言語設定をリセット") %></button>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col align-self-center">
+										<% if (isAlreadySignIn) { %>
+											<div class="text-center small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
+										<% } else { %>
+											<div class="text-center small"><%= title %> - <a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
+										<% } %>
 									</div>
 								</div>
 							<% } %>

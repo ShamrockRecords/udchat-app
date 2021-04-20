@@ -103,5 +103,6 @@
 	"3日前からの記録をCSVデータでダウンロードします。": "Download the chat contents from 3 days ago.",
 	"チャットに参加するときに必要なパスコードを設定します。省略することもできます。": "Set the passcode for joining the chat. You can ommit it.",
 	"人参加しています": " more people are joining",
-	"他": ""
+	"他": "",
+	"参加者リスト": "Member List"
 }
