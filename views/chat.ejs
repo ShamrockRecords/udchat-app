@@ -119,7 +119,8 @@
 			// When message came.
 			socket.on('message', async (message) => {
 				let commands = JSON.parse(message) ;
-				
+				let readerTargetElement = null ;
+
 				for (let key in commands) {
 					let command = commands[key] ;
 					let timestamp = command.timestamp ;
@@ -162,16 +163,18 @@
 					command.message = command.message.replace("\n", "<br />") ;
 					command.message = command.message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank">$1</a> ')
 
-					let element = $('<div class="p-3" style="width: 100%;" aria-live="polite">') ;
+					let element = $('<div class="p-3" style="width: 100%;">') ;
 					
 					if (command.method == 'message' || command.method == 'information') {
 						if ("<%= uid %>" == command.uid) {
 							element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
 
 							if (command.method == 'information') {
-								element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
+								readerTargetElement = $('<div class="right px-4 py-2 small">') ;
+								element.append(readerTargetElement.html(command.message)) ;
 							} else {
-								element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(command.message)) ;
+								readerTargetElement = $('<div class="right messageRight rounded-pill px-4 py-2">') ;
+								element.append(readerTargetElement.html(command.message)) ;
 							
 								if ((command.translation != undefined && command.translation != '') && 
 									(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
@@ -182,9 +185,11 @@
 							element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
 
 							if (command.method == 'information') {
-								element.append($('<div class="left small">').html(command.message)) ;
+								readerTargetElement = $('<div class="left small">') ;
+								element.append(readerTargetElement.html(command.message)) ;
 							} else {
-								element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(command.message)) ;
+								readerTargetElement = $('<div class="left messageLeft rounded-pill px-4 py-2">') ;
+								element.append(readerTargetElement.html(command.message)) ;
 							}
 
 							let translation = "" ;
@@ -199,7 +204,8 @@
 							}
 
 							if (translation != "" && command.language != $('#languages option:selected').val()) {
-								element.append($('<div class="left messageLeft rounded-pill translation px-4 py-2">').html(translation)) ;
+								readerTargetElement = $('<div class="left messageLeft rounded-pill translation px-4 py-2">') ;
+								element.append(readerTargetElement.html(translation)) ;
 							}
 						}
 
@@ -207,6 +213,10 @@
 					} else if (command.method == 'status') {
 						updateMemberList(command) ;
 					}
+				}
+
+				if (readerTargetElement != null) {
+					readerTargetElement.attr('aria-live', 'polite');
 				}
 
 				// If commands were included not "status", do automatic scroll or show notification.
