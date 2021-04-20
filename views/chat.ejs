@@ -162,11 +162,11 @@
 					command.message = command.message.replace("\n", "<br />") ;
 					command.message = command.message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank">$1</a> ')
 
-					let element = $('<div class="p-3" style="width: 100%;">') ;
+					let element = $('<div class="p-3" style="width: 100%;" aria-live="polite">') ;
 					
 					if (command.method == 'message' || command.method == 'information') {
 						if ("<%= uid %>" == command.uid) {
-							element.append($('<div class="right name px-2 my-1" aria-live="polite">').html(getDateString(timestamp))) ;
+							element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
 
 							if (command.method == 'information') {
 								element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
@@ -179,7 +179,7 @@
 								}
 							}
 						} else {
-							element.append($('<div class="left name px-2 my-1" aria-live="polite">').html(command.name + " " + getDateString(timestamp))) ;
+							element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
 
 							if (command.method == 'information') {
 								element.append($('<div class="left small">').html(command.message)) ;
