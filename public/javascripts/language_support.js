@@ -1,5 +1,4 @@
 async function detect(apiKey, message, completion) {	
-
     if (apiKey == '') {
         completion("", "") ;
         return ;
@@ -19,7 +18,6 @@ async function detect(apiKey, message, completion) {
 }
 
 async function translate(apiKey, message, from, to, completion) {
-
     if (apiKey == '') {
         completion("", "") ;
         return ;
@@ -47,7 +45,6 @@ async function translate(apiKey, message, from, to, completion) {
 }
 
 async function supportedLanguages(apiKey) {
-
     if (apiKey == '') {
         return ;
     }
