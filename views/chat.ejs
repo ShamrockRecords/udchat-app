@@ -139,6 +139,7 @@
 
 							commands.push(command) ;
 							commands.push(createStatusCommand('joined')) ;
+							commands.push(createStatusCommand('focused')) ;
 						}
 
 						sendCommands(socket, commands) ;
