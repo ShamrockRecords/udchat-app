@@ -730,29 +730,28 @@
 										<button class="btn btn-danger btn-sm" type="button" id="resetTranslationSettingsButton"><%- __("言語設定をリセット") %></button>
 									</div>
 								</div>
-								<div class="row">
-									<div class="col align-self-center">
-										<% if (isAlreadySignIn) { %>
-											<div class="text-center small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
-										<% } else { %>
-											<div class="text-center small"><%= title %> - <a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
-										<% } %>
-									</div>
-								</div>
 							<% } %>
 						</div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col">
-						<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="" maxlength="200" aria-describedby="hint"></textarea>
+						<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="<%- __("Enterキーで送信 Shift+Enterで改行") %>" maxlength="200" aria-describedby="hint"></textarea>
 					</div>
 					<div class="col-auto align-self-center pl-0" id="speechRecongizerButtonCol" hidden>
 						<button class="form-control btn btn-primary my-1 btn-sm" style="width: 120px" id="speechRecongizerButton"><%- __("音声入力") %></button>							
 					</div>
 				</div>
 				<button class="form-control btn btn-primary my-1" id="sendButton"><%- __("送信") %></button>	
-				<div class="text-center my-1 small" id="hint"><%- __("Enterキーで送信 Shift+Enterで改行") %></div>
+				<div class="row">
+					<div class="col align-self-center">
+						<% if (isAlreadySignIn) { %>
+							<div class="text-center small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
+						<% } else { %>
+							<div class="text-center small"><%= title %> - <a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
+						<% } %>
+					</div>
+				</div>
 			</div>
 		</div>
 	</body>
