@@ -304,16 +304,28 @@
 				});
 
 				$('#members').empty() ;
-					
+				
+				let count = 0 ;
+
 				for (let key in uidArray) {
 					let command = uidMap[uidArray[key]] ;
 					console.log(command.param);
 
 					if (command.param == 'focused') {
-						$('#members').append($('<div class="right p-1 small" id="' + command.uid + '">').html('<strong><i class="far fa-eye m-1"></i>' + command.name + "</strong>")) ;
+						$('#members').append($('<div class="p-1 small" id="' + command.uid + '">').html('<strong>' + command.name + '<i class="far fa-eye m-1"></i></strong>')) ;
 					} else {
-						$('#members').append($('<div class="right p-1 small" id="' + command.uid + '">').text(command.name)) ;
+						$('#members').append($('<div class="p-1 small" id="' + command.uid + '">').text(command.name)) ;
 					}
+
+					count++ ;
+
+					if (count == 10) {
+						break ;
+					}
+				}
+
+				if (uidArray.length != count) {
+					$('#members').append($('<div class="p-1 small">').text('<%- __("他") %>' + (uidArray.length - count) + '<%- __("人参加しています") %>')) ;
 				}
 
 				$('#members').offset({ 
@@ -611,7 +623,7 @@
 			<div class="top p-1" id="messages"></div>
 
 			<div class="rounded text-center p-1" id="notification" hidden><%- __("新しいメッセージがあります") %></div>
-			<div class="rounded text-center p-1" id="members" hidden></div>
+			<div class="rounded p-1" id="members" hidden></div>
 			
 			<div class="bottom p-1" id="operation">
 				<div class="row">

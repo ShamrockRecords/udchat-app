@@ -101,5 +101,7 @@
 	"お待ちください": "Please wait",
 	"内容を保存": "Save Contents",
 	"3日前からの記録をCSVデータでダウンロードします。": "Download the chat contents from 3 days ago.",
-	"チャットに参加するときに必要なパスコードを設定します。省略することもできます。": "Set the passcode for joining the chat. You can ommit it."
+	"チャットに参加するときに必要なパスコードを設定します。省略することもできます。": "Set the passcode for joining the chat. You can ommit it.",
+	"人参加しています": " more people are joining",
+	"他": ""
 }
