@@ -57,7 +57,7 @@
 	"UD Chatについて": "About UD Chat",
 	"解決できる課題": "Subjects that can be solved",
 	"簡単に誰でも参加できる自動翻訳機能付きグループチャットを作ることができます。": "Anyone can create group text chat with automatic translation.",
-	"まず最初にプロフィールで名前を入力してください。": "First please make your profile.",
+	"まず最初にプロフィールで名前を入力してください。": "First, please input your profile.",
 	"note01": "Your email address will not be used for any purpose other than this service.",
 	"note02": "All chat logs are stored in a database as evidence in case of illegal use.",
 	"note03": "Chat contents will not be reused as data.",
@@ -101,5 +101,8 @@
 	"お待ちください": "Please wait",
 	"内容を保存": "Save Contents",
 	"3日前からの記録をCSVデータでダウンロードします。": "Download the chat contents from 3 days ago.",
-	"チャットに参加するときに必要なパスコードを設定します。省略することもできます。": "Set the passcode for joining the chat. You can ommit it."
+	"チャットに参加するときに必要なパスコードを設定します。省略することもできます。": "Set the passcode for joining the chat. You can ommit it.",
+	"人参加しています": " more people are joining",
+	"他": "",
+	"参加者リスト": "Member List"
 }

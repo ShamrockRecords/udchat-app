@@ -110,6 +110,10 @@ router.get('/download', wrap(async function(req, res, next) {
         let doc = snapshot.docs[key] ;
         let command = doc.data() ;
 
+        if (command.method == 'status') {
+            continue ;
+        }
+
         let date = new Date(command.timestamp.toDate().toUTCString()) ;
 
         date.setHours(date.getHours() + (date.getTimezoneOffset() - reqestedTimezoneOffset)/60) ;

@@ -18,12 +18,12 @@
 					<input required type="text" maxlength="30" class="form-control" id="name" name="name" value="<%= data.name %>" aria-describedby="nameHelp">
 				</div>
 				<div class="form-group">
-					<label for="passcode"><%- __("名前") %></label>
+					<label for="displayName"><%- __("名前") %></label>
 					<input type="text" maxlength="30" class="form-control" id="displayName" name="displayName" value="<%= data.displayName %>" aria-describedby="displayNameHelp">
 					<small id="displayNameHelp" class="form-text text-muted"><%- __("チャットに表示される名前を入力してください。省略するとプロフィールの名前になります。") %></small>
 				</div>
 				<div class="form-group">
-					<label for="name"><%- __("パスコード") %><span class="badge badge-danger"></span></label>
+					<label for="passcode"><%- __("パスコード") %><span class="badge badge-danger"></span></label>
 					<input autocomplete="off" type="text" maxlength="30" class="form-control" id="passcode" name="passcode" value="<%= data.passcode %>" aria-describedby="passcodeHelp">
 					<small id="passcodeHelp" class="form-text text-muted"><%- __("チャットに参加するときに必要なパスコードを設定します。省略することもできます。") %></small>
 				</div>
