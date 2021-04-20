@@ -169,7 +169,7 @@
 							element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
 
 							if (command.method == 'information') {
-								element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
+								element.append($('<div class="right px-4 py-2 small" aria-live="polite">').html(command.message)) ;
 							} else {
 								element.append($('<div class="right messageRight rounded-pill px-4 py-2" aria-live="polite">').html(command.message)) ;
 							
@@ -182,7 +182,7 @@
 							element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
 
 							if (command.method == 'information') {
-								element.append($('<div class="left small">').html(command.message)) ;
+								element.append($('<div class="left small" aria-live="polite">').html(command.message)) ;
 							} else {
 								element.append($('<div class="left messageLeft rounded-pill px-4 py-2" aria-live="polite">').html(command.message)) ;
 							}
@@ -199,7 +199,7 @@
 							}
 
 							if (translation != "" && command.language != $('#languages option:selected').val()) {
-								element.append($('<div class="left messageLeft rounded-pill translation px-4 py-2">').html(translation)) ;
+								element.append($('<div class="left messageLeft rounded-pill translation px-4 py-2 aria-live="polite"">').html(translation)) ;
 							}
 						}
 
