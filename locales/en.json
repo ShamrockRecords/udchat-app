@@ -7,7 +7,7 @@
 	"が参加しました。": " joined.",
 	"新しいメッセージがあります": "New Message",
 	"送信": "Send",
-	"Enterキーで送信 Shift+Enterで改行": "Press Enter: Send, Press Shift+Enter: Return",
+	"Enterキーで送信 Shift+Enterで改行": "Message : Press Enter: Send, Press Shift+Enter: Return",
 	"クリップボードにコピーしました。": "Copied to clipboard.",
 	"UD Chat": "UD Chat",
 	"トップページ": "Top",
@@ -105,5 +105,6 @@
 	"人参加しています": " more people are joining",
 	"他": "",
 	"参加者リスト": "Member List",
-	"こちら": "Click here"
+	"こちら": "Click here",
+	"メッセージを入力": "Input message"
 }

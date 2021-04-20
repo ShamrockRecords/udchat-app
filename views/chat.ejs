@@ -171,7 +171,7 @@
 							if (command.method == 'information') {
 								element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
 							} else {
-								element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(command.message)) ;
+								element.append($('<div class="right messageRight rounded-pill px-4 py-2" aria-live="polite">').html(command.message)) ;
 							
 								if ((command.translation != undefined && command.translation != '') && 
 									(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
@@ -184,7 +184,7 @@
 							if (command.method == 'information') {
 								element.append($('<div class="left small">').html(command.message)) ;
 							} else {
-								element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(command.message)) ;
+								element.append($('<div class="left messageLeft rounded-pill px-4 py-2" aria-live="polite">').html(command.message)) ;
 							}
 
 							let translation = "" ;
@@ -735,7 +735,7 @@
 				</div>
 				<div class="row">
 					<div class="col">
-						<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="<%- __("Enterキーで送信 Shift+Enterで改行") %>" maxlength="200" aria-describedby="hint"></textarea>
+						<textarea class="form-control my-1" id="message" name="message" title=""<%- __("メッセージを入力") %>" placeholder="<%- __("Enterキーで送信 Shift+Enterで改行") %>" maxlength="200" aria-describedby="hint"></textarea>
 					</div>
 					<div class="col-auto align-self-center pl-0" id="speechRecongizerButtonCol" hidden>
 						<button class="form-control btn btn-primary my-1 btn-sm" style="width: 120px" id="speechRecongizerButton"><%- __("音声入力") %></button>							
