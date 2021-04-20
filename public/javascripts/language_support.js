@@ -1,5 +1,4 @@
 async function detect(apiKey, message, completion) {	
-
     if (apiKey == '') {
         completion("", "") ;
         return ;
@@ -19,7 +18,6 @@ async function detect(apiKey, message, completion) {
 }
 
 async function translate(apiKey, message, from, to, completion) {
-
     if (apiKey == '') {
         completion("", "") ;
         return ;
@@ -47,7 +45,6 @@ async function translate(apiKey, message, from, to, completion) {
 }
 
 async function supportedLanguages(apiKey) {
-
     if (apiKey == '') {
         return ;
     }
@@ -57,7 +54,7 @@ async function supportedLanguages(apiKey) {
     let body = {"target": getDefaultLanguage()} ;
 
     let data = await fetch(URL, {method: "POST", body: JSON.stringify(body)}).then(response => response.json()) ;
-    
+       
     return data.data.languages ;
 }
 
@@ -260,7 +257,6 @@ function getSupportedSpeechRecognitionLocales() {
 
         return supportedLocales ;
     } catch (e) {
-        console.log(e) ;
         return [] ;
     }
 }

@@ -14,15 +14,24 @@ router.get('/', wrap(async function(req, res, next) {
         return ;
     }
 
+    let currentUser = req.session.user ;
     let chatId = req.query.chatId ;
     let data = {} ;
 
     if (chatId != undefined) {
         let doc = await admin.firestore().collection("chats").doc(chatId).get() ;
         data = doc.data() ;
+
+        if (data.ownerUid != currentUser.uid) {
+            res.redirect('/');
+            return ;
+        }
     }
 
-    res.render('create', {data: data});		 
+    res.render('create', {
+        lang: res.locale,
+        data: data
+    });		 
 })) ;
 
 router.post('/', wrap(async (req, res, next) => {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="<%= lang %>">
   	<head>
 		<title><%- __("UD Chat") %> - <%- __("トップページ") %></title>
     	<%- include('parts/head', {}) %>
@@ -15,6 +15,13 @@
 			// コピーをお知らせする
 			alert('<%- __("クリップボードにコピーしました。") %>');
 		}
+
+		function onClickSaveContentsButton(chatId) {
+			let date = new Date() ;
+
+			location.href='/download?chatId=' + chatId + '&to=' + date.getTimezoneOffset() ;
+		}
+
 	  </script>
 	  <style>
 		  #command {
@@ -67,12 +74,20 @@
 					</tr>
 					<tr>
 						<td colspan="2">
-							<textarea id="<%= chat.chatId %>" style="resize: none; width: 100%" readonly><%= rootURL %>/chat?chatId=<%= chat.chatId %></textarea>
+							<textarea id="<%= chat.chatId %>" style="resize: none; width: 100%" readonly aria-describedby="<%= chat.chatId %>Help"><%= rootURL %>/chat?chatId=<%= chat.chatId %></textarea>
+							<small id="<%= chat.chatId %>Help" class="form-text text-muted"><%- __("URLをコピーしてチャットをしたい相手に送ったりサイトに掲載してください。") %></small>
 						</td>
 					</tr>
 					<tr>
 						<td class="small" colspan="2">
-							<%- __("URLをコピーしてチャットをしたい相手に送ったりサイトに掲載してください。") %>
+							<div class="row">
+								<div class="col-auto">
+									<button class="btn btn-info" onClick="onClickSaveContentsButton('<%= chat.chatId %>')"><%- __("内容を保存") %></button>
+								</div>
+								<div class="col">
+									<%- __("3日前からの記録をCSVデータでダウンロードします。") %>
+								</div>
+							</div>
 						</td>
 					</tr>
 				</table>

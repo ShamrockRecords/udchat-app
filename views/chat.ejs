@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="<%= lang %>">
 	<head>
 		<title><%- __("APP_NAME") %> - <%= title %></title>
 		<%- include('parts/head', {}) %>
@@ -72,6 +72,14 @@
 				color: white;
 			}
 
+			#members {
+				z-index: 2;
+				position: absolute; 
+				background-color:gray;
+				color: white;
+				opacity: 0.55;
+			}
+		
 			.modal{
 				display: none;
 				height: 100vh;
@@ -105,43 +113,38 @@
 			let isBottom = true ;
 			let becameBackground = false ;
 			let isSpeechRecognizing = false ;
-
-			function escapeHTML(string){
-				return string.replace(/\&/g, '&amp;')
-				.replace(/\</g, '&lt;')
-				.replace(/\>/g, '&gt;')
-				.replace(/\"/g, '&quot;')
-				.replace(/\'/g, '&#x27');
-			}
-
-			function unescapeHTML(escapedHtml) {
-				const doc = new DOMParser().parseFromString(escapedHtml, 'text/html');
-				return doc.documentElement.textContent;
-			}
+			let uidMap = {} ;
+			let uidArray = [] ;
 
 			// When message came.
 			socket.on('message', async (message) => {
 				let commands = JSON.parse(message) ;
-				
+				let readerTargetElement = null ;
+
 				for (let key in commands) {
 					let command = commands[key] ;
 					let timestamp = command.timestamp ;
 
 					if (command.method == 'requestConnecting') {
-						let command = {
-							requestId: "<%= requestId %>",
-							uid: "<%= uid %>",
-							name: "<%= name %>",
-							language: $('#inputLanguages option:selected').val(),
-							message: "<%= name %>" + '<%- __("が参加しました。") %>',
-							method: 'information',
-						} ;
+						let commands = [] ;
 
-						command.name = unescapeHTML(command.name) ;
-						command.message = unescapeHTML(command.message) ;
+						{
+							let command = {
+								requestId: "<%= requestId %>",
+								uid: "<%= uid %>",
+								name: "<%= name %>",
+								language: $('#inputLanguages option:selected').val(),
+								message: "<%= name %>" + '<%- __("が参加しました。") %>',
+								method: 'information',
+							} ;
 
-						socket.send(JSON.stringify(command)) ;
+							commands.push(command) ;
+							commands.push(createStatusCommand('joined')) ;
+							commands.push(createStatusCommand('focused')) ;
+						}
 
+						sendCommands(socket, commands) ;
+					
 						continue ;
 					}
 
@@ -162,86 +165,203 @@
 
 					let element = $('<div class="p-3" style="width: 100%;">') ;
 					
-					if ("<%= uid %>" == command.uid) {
-						element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
+					if (command.method == 'message' || command.method == 'information') {
+						if ("<%= uid %>" == command.uid) {
+							element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
 
-						if (command.method == 'information') {
-							element.append($('<div class="right px-4 py-2 small">').html(command.message)) ;
+							if (command.method == 'information') {
+								readerTargetElement = $('<div class="right px-4 py-2 small">') ;
+								element.append(readerTargetElement.html(command.message)) ;
+							} else {
+								readerTargetElement = $('<div class="right messageRight rounded-pill px-4 py-2">') ;
+								element.append(readerTargetElement.html(command.message)) ;
+							
+								if ((command.translation != undefined && command.translation != '') && 
+									(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
+									element.append($('<div class="right messageRight rounded-pill reversetTranslation px-4 py-2">').html('<span style="font-size: small;">' + command.translation + '</span>' + '<br />' + command.reverseTranslation)) ;
+								}
+							}
 						} else {
-							element.append($('<div class="right messageRight rounded-pill px-4 py-2">').html(command.message)) ;
-						
-							if ((command.translation != undefined && command.translation != '') && 
-								(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
-								element.append($('<div class="right messageRight rounded-pill reversetTranslation px-4 py-2">').html('<span style="font-size: small;">' + command.translation + '</span>' + '<br />' + command.reverseTranslation)) ;
+							element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
+
+							if (command.method == 'information') {
+								readerTargetElement = $('<div class="left small">') ;
+								element.append(readerTargetElement.html(command.message)) ;
+							} else {
+								readerTargetElement = $('<div class="left messageLeft rounded-pill px-4 py-2">') ;
+								element.append(readerTargetElement.html(command.message)) ;
+							}
+
+							let translation = "" ;
+							
+							if (command.language != undefined && command.needsTranslating) {
+								await translate("<%= apiKey %>", command.message, command.language, $('#languages option:selected').val(), (t, from) => {
+									translation = t ;
+									if (from != undefined) {
+										command.language = from ;
+									}
+								}) ;
+							}
+
+							if (translation != "" && command.language != $('#languages option:selected').val()) {
+								readerTargetElement = $('<div class="left messageLeft rounded-pill translation px-4 py-2">') ;
+								element.append(readerTargetElement.html(translation)) ;
 							}
 						}
-					} else {
-						element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
 
-						if (command.method == 'information') {
-							element.append($('<div class="left px-4 py-2 small">').html(command.message)) ;
+						$('#messages').append(element);
+					} else if (command.method == 'status') {
+						updateMemberList(command) ;
+					}
+				}
+
+				if (readerTargetElement != null) {
+					readerTargetElement.attr('aria-live', 'polite');
+				}
+
+				// If commands were included not "status", do automatic scroll or show notification.
+				for (let key in commands) {
+					let commnad = commands[key] ;
+
+					if (commnad.method != 'status') {
+						if (isBottom || "<%= uid %>" == commnad.uid) {
+							scrollToEnd() ;
+
+							if (becameBackground) {
+								sendNewMessageNotification(commnad.message) ;
+							}
 						} else {
-							element.append($('<div class="left messageLeft rounded-pill px-4 py-2">').html(command.message)) ;
+							sendNewMessageNotification(commnad.message) ;
+
+							$('#notification').prop('hidden', false) ;
+							$('#notification').show() ;
+							
+							offsetNotification() ;
 						}
 
-						let translation = "" ;
-						 
-						if (command.language != undefined && command.needsTranslating) {
-							await translate("<%= apiKey %>", command.message, command.language, $('#languages option:selected').val(), (t, from) => {
-								translation = t ;
-								if (from != undefined) {
-									command.language = from ;
-								}
-							}) ;
-						}
-
-						if (translation != "" && command.language != $('#languages option:selected').val()) {
-							element.append($('<div class="left messageLeft rounded-pill translation px-4 py-2">').html(translation)) ;
-						}
+						break ;
 					}
-
-					$('#messages').append(element);
-				}
-				
-				function scrollToEnd() {
-					$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
-					$('#notification').hide() ;
-				}
-
-				function sendNewMessageNotification(message) {
-					if (Push.Permission.has()) {
-						Push.create('<%- __("APP_NAME") %> - <%= title %>', {
-						　　body: message,
-						　　icon: '',
-						　　timeout: 10000,
-						　　onClick: function() {
-							　　scrollToEnd() ;
-								$(window).focus() ;
-								this.close();
-						　　}
-						});
-					}
-				}
-
-				let lastCommand = commands[commands.length-1] ;
-
-				if (isBottom || "<%= uid %>" == lastCommand.uid) {
-					scrollToEnd() ;
-
-					if (becameBackground) {
-						sendNewMessageNotification(lastCommand.message) ;
-					}
-				} else {
-					
-					sendNewMessageNotification(lastCommand.message) ;
-
-					$('#notification').show() ;
-					$('#notification').offset({ 
-						top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
-						left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
-					});
 				}
 			});
+
+			function scrollToEnd() {
+				$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
+				$('#notification').hide() ;
+			}
+
+			function sendNewMessageNotification(message) {
+				if (Push.Permission.has()) {
+					Push.create('<%- __("APP_NAME") %> - <%= title %>', {
+					　　body: message,
+					　　icon: '',
+					　　timeout: 10000,
+					　　onClick: function() {
+						　　scrollToEnd() ;
+							$(window).focus() ;
+							this.close();
+					　　}
+					});
+				}
+			}
+
+			function updateMemberList(command) {
+				if (command.param == 'joined') {
+					if (uidMap[command.uid] == undefined) {
+						uidMap[command.uid] = command ;
+						uidArray.unshift(command.uid) ;
+					} else {
+						let index = uidArray.indexOf(command.uid) ;
+
+						if (index > 0) {
+							uidArray.splice(index, 1) ;
+							uidArray.unshift(command.uid) ;
+						}
+					}
+				} else if (command.param == 'left') {
+					if (uidMap[command.uid] != undefined) {
+						delete uidMap[command.uid] ;
+
+						let index = uidArray.indexOf(command.uid) ;
+
+						if (index >= 0) {
+							uidArray.splice(index, 1) ;
+						}
+					}
+				} else if (command.param == 'focused') {
+					if (uidMap[command.uid] == undefined) {
+						uidMap[command.uid] = command ;
+						uidArray.unshift(command.uid) ;
+					} else {
+						uidMap[command.uid] = command ;
+					}
+				} else if (command.param == 'unfocused') {
+					if (uidMap[command.uid] == undefined) {
+						uidMap[command.uid] = command ;
+						uidArray.unshift(command.uid) ;
+					} else {
+						uidMap[command.uid] = command ;
+					}
+				} else {
+					return ;
+				}
+
+				offsetMemebers() ;
+
+				$('#members').empty() ;
+				
+				let count = 0 ;
+
+				for (let key in uidArray) {
+					let command = uidMap[uidArray[key]] ;
+
+					if (command.param == 'focused') {
+						$('#members').append($('<div class="p-1 small" id="' + command.uid + '">').html('<strong>' + command.name + '<i class="far fa-eye m-1"></i></strong>')) ;
+					} else {
+						$('#members').append($('<div class="p-1 small" id="' + command.uid + '">').text(command.name)) ;
+					}
+
+					count++ ;
+
+					if (count == 10) {
+						break ;
+					}
+				}
+
+				if (uidArray.length != count) {
+					$('#members').append($('<div class="p-1 small">').text('<%- __("他") %>' + (uidArray.length - count) + '<%- __("人参加しています") %>')) ;
+				}
+
+				offsetMemebers() ;
+				
+				if (Object.keys(uidMap).length == 0) {
+					$('#members').prop('hidden', true) ;
+				}
+			}
+
+			//
+			function sendCommands(socket, commands) {
+				for (let key in commands) {
+					let command = commands[key] ;
+
+					command.name = unescapeHTML(command.name) ;
+					command.message = unescapeHTML(command.message) ;
+				}
+
+				socket.send(JSON.stringify(commands)) ;
+			}
+
+			//
+			function createStatusCommand(status) {
+				return {
+					requestId: "<%= requestId %>",
+					uid: "<%= uid %>",
+					name: $('#displayName').val(),
+					language: '',
+					message: '',
+					method: 'status',
+					param: status
+				} ;
+			}
 
 			// Window loaded.
 			$(window).on('load', async function() {				
@@ -258,73 +378,35 @@
 						isBottom = false ;
 					}
 				}) ;
-
-				function resize() {
-					$('#messages').height($('body').height() - $('#operation').height()) ;
-				}
 				
 				resize() ;
-
-				$(window).on('resize', function() {
-					resize() ;					
-				}) ;
 
 				$('#notification').hide() ;
 
 				let languages = await supportedLanguages("<%= apiKey %>") ;
 				let locales = getSupportedSpeechRecognitionLocales() ;
 
-				function initLauguageSelect(tag, defaultLanguage, defaultOption, languages) {
-					
-					if (localStorage.getItem(tag)) {
-						defaultLanguage = localStorage.getItem(tag) ;
-					}
-
-					if (defaultOption != '') {
-						let option = $('<option>') ;
-
-						option.attr("value", '') ;
-						option.text(defaultOption) ;
-						$('#' + tag).append(option) ;
-
-						if (defaultLanguage == "") {
-							option.prop('selected', true) ;
-						}
-					}
-
-					for (let key in languages) {
-						let option = $('<option>') ;
-
-						option.attr("value", languages[key].language) ;
-
-						if (defaultLanguage == languages[key].language) {
-							option.prop('selected', true) ;
-						}
-
-						option.text(languages[key].name) ;
-
-						$('#' +tag).append(option) ;
-					}
-
-					$('#' +tag).change(() => {
-						localStorage.setItem(tag, $('#' +tag + ' option:selected').val());
-					}) ;
-				}
-
 				initLauguageSelect('languages', getDefaultLanguage(), '', languages) ;
 				initLauguageSelect('inputLanguages', '', '<%- __("自動判別") %>', languages) ;
 				initLauguageSelect('reverseTranslationLanguages', '', '<%- __("なし") %>', languages) ;
 				initLauguageSelect('speechRecognitionLocales', '', '<%- __("ブラウザ設定") %>', locales) ;
 				
-				socket.send(JSON.stringify({
-					requestId: "<%= requestId %>",
-					uid: "<%= uid %>",
-					name: "<%= name %>",
-					language: '',
-					message: '',
-					method:'requestConnecting',
-				})) ;
+				{
+					let command = {
+						requestId: "<%= requestId %>",
+						uid: "<%= uid %>",
+						name: "<%= name %>",
+						language: '',
+						message: '',
+						method:'requestConnecting',
+					} ;
 
+					sendCommands(socket, [command]) ;
+				}
+
+				initSpeechRecognition() ;
+
+				// resetTranslationSettingsButton was clicked.
 				$('#resetTranslationSettingsButton').on('click', () => {
 					$('#languages').val(getDefaultLanguage()) ;
 					$('#inputLanguages').val('') ;
@@ -337,11 +419,13 @@
 					localStorage.setItem('speechRecognitionLocales', $('#speechRecognitionLocales' + ' option:selected').val());
 				}) ;
 
+				// notification label was clicked.
 				$('#notification').on('click', () => {
 					$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
 					$('#notification').hide() ;
 				}) ;
 
+				// settingButton was clicked.
 				$('#settingButton').on('click', () => {
 					setTimeout(() => {
 						resize() ;
@@ -350,6 +434,168 @@
 					}, 500);
 				}) ;
 
+				// sendButton was clicked.
+				$('#sendButton').on('click', () => {
+					let text = $('#message').val() ;
+
+					$('#message').val('') ;
+
+					send(text) ;
+				}) ;
+
+				// showMembersButton was clicked.
+				$('#showMembersButton').on('click', () => {
+					if ($('#members').prop('hidden')) {
+						$('#members').prop('hidden', false) ;
+
+						offsetMemebers() ;
+						
+						localStorage.setItem('showMembers', true) ;
+					} else {
+						$('#members').prop('hidden', true) ;
+
+						localStorage.setItem('showMembers', false) ;
+					}
+				}) ;
+
+				if (localStorage.getItem('showMembers')) {
+					$('#members').prop('hidden', false) ;
+
+					offsetMemebers() ;
+				}
+				
+				// When user actived.
+				$(window).on('focus', () => {
+					becameBackground = false ;
+					sendCommands(socket, [createStatusCommand('focused')]) ;
+				}) ;
+
+				// When user unactived.
+				$(window).on('blur', () => {
+					becameBackground = true ;
+					sendCommands(socket, [createStatusCommand('unfocused')]) ;
+				}) ;
+			}) ;
+
+			// Window size changed.
+			$(window).on('resize', function() {
+				resize() ;					
+			}) ;
+
+			// keypress detected.
+			$(document).keypress(function(e) {
+				if (!event.shiftKey &&　((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13))) {
+					let text = $('#message').val() ;
+
+					$('#message').val('') ;
+
+					send(text) ;
+					e.preventDefault();
+				}
+			}) ;
+		
+			function offsetMemebers() {
+				$('#members').offset({ 
+						top: 10,
+					left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
+				});
+			}
+
+			function offsetNotification() {
+				$('#notification').offset({ 
+					top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
+					left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
+				});
+			}
+
+			function resize() {
+				$('#messages').height($('body').height() - $('#operation').height()) ;
+
+				offsetMemebers() ;
+
+				offsetNotification() ;
+			}
+
+			// send message
+			async function send(text) {
+				if (text != '') {
+					let selectedInputLanguage = $('#inputLanguages option:selected').val() ;
+
+					if (selectedInputLanguage == '') {
+						await detect("<%= apiKey %>", text, (language) => {
+							selectedInputLanguage = language ;
+						}) ;
+					}
+
+					let selectedReverseTranslationLanguage = $('#reverseTranslationLanguages option:selected').val() ;
+					let translation = '' ;
+					let reverseTranslation = '' ;
+
+					if (selectedReverseTranslationLanguage != '' &&
+						selectedInputLanguage != selectedReverseTranslationLanguage) {
+				
+						await translate("<%= apiKey %>", text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
+							translation = unescapeHTML(t) ;
+						}) ;
+
+						await translate("<%= apiKey %>", translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
+							reverseTranslation = unescapeHTML(t) ;
+						}) ;
+					}
+
+					let command = {
+						requestId: "<%= requestId %>",
+						uid: "<%= uid %>",
+						name: $('#displayName').val(),
+						language: selectedInputLanguage,
+						message: text,
+						method:'message',
+						translation: translation,
+						translationLanguage: selectedReverseTranslationLanguage,
+						reverseTranslation: reverseTranslation,
+					} ;
+
+					sendCommands(socket, [command, createStatusCommand('focused')]) ;
+				}
+			}
+
+			function initLauguageSelect(tag, defaultLanguage, defaultOption, languages) {					
+				if (localStorage.getItem(tag)) {
+					defaultLanguage = localStorage.getItem(tag) ;
+				}
+
+				if (defaultOption != '') {
+					let option = $('<option>') ;
+
+					option.attr("value", '') ;
+					option.text(defaultOption) ;
+					$('#' + tag).append(option) ;
+
+					if (defaultLanguage == "") {
+						option.prop('selected', true) ;
+					}
+				}
+
+				for (let key in languages) {
+					let option = $('<option>') ;
+
+					option.attr("value", languages[key].language) ;
+
+					if (defaultLanguage == languages[key].language) {
+						option.prop('selected', true) ;
+					}
+
+					option.text(languages[key].name) ;
+
+					$('#' +tag).append(option) ;
+				}
+
+				$('#' +tag).change(() => {
+					localStorage.setItem(tag, $('#' +tag + ' option:selected').val());
+				}) ;
+			}
+
+			function initSpeechRecognition() {
 				try {
 					SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
 
@@ -399,82 +645,14 @@
 					$('#speechRecongizerButtonCol').prop('hidden', true) ;
 					$('#speechRecognitionLocales').prop("disabled", true);
 				}
-
-				$('#sendButton').on('click', () => {
-					let text = $('#message').val() ;
-
-					$('#message').val('') ;
-
-					send(text) ;
-				}) ;
-
-				$(window).on('focus', () => {
-					becameBackground = false ;
-				}) ;
-
-				$(window).on('blur', () => {
-					becameBackground = true ;
-				}) ;
-			}) ;
-			
-			// keypress detected.
-			$(document).keypress(function(e) {
-				if (!event.shiftKey &&　((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13))) {
-					let text = $('#message').val() ;
-
-					$('#message').val('') ;
-
-					send(text) ;
-					e.preventDefault();
-				}
-			}) ;
-
-			// send message
-			async function send(text) {
-				if (text != '') {
-					let selectedInputLanguage = $('#inputLanguages option:selected').val() ;
-
-					if (selectedInputLanguage == '') {
-						await detect("<%= apiKey %>", text, (language) => {
-							selectedInputLanguage = language ;
-						}) ;
-					}
-
-					let selectedReverseTranslationLanguage = $('#reverseTranslationLanguages option:selected').val() ;
-					let translation = '' ;
-					let reverseTranslation = '' ;
-
-					if (selectedReverseTranslationLanguage != '' &&
-						selectedInputLanguage != selectedReverseTranslationLanguage) {
-				
-						await translate("<%= apiKey %>", text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
-							translation = unescapeHTML(t) ;
-						}) ;
-
-						await translate("<%= apiKey %>", translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
-							reverseTranslation = unescapeHTML(t) ;
-						}) ;
-					}
-
-					socket.send(JSON.stringify({
-						requestId: "<%= requestId %>",
-						uid: "<%= uid %>",
-						name: $('#displayName').val(),
-						language: selectedInputLanguage,
-						message: text,
-						method:'message',
-						translation: translation,
-						translationLanguage: selectedReverseTranslationLanguage,
-						reverseTranslation: reverseTranslation,
-					})) ;
-				}
 			}
 		</script>
 
 		<div id='main'>
 			<div class="top p-1" id="messages"></div>
 
-			<div class="rounded text-center p-1" id="notification"><%- __("新しいメッセージがあります") %></div>
+			<div class="rounded text-center p-1" id="notification" hidden><%- __("新しいメッセージがあります") %></div>
+			<div class="rounded p-1" id="members" hidden></div>
 			
 			<div class="bottom p-1" id="operation">
 				<div class="row">
@@ -495,6 +673,7 @@
 							});
 						</script>
 						<button class="js-modal-open btn btn-info btn-sm" type="button"><%- __("バーコード") %></button>
+						<button class="btn btn-info btn-sm" type="button" id="showMembersButton"><%- __("参加者リスト") %></button>
 						<div class="modal js-modal">
 							<div class="modal__bg js-modal-close"></div>
 							<div class="modal__content py-3">
@@ -515,13 +694,6 @@
 								</div>								
 							</div><!--modal__inner-->
 						</div><!--modal-->
-					</div>
-					<div class="col align-self-center">
-						<% if (isAlreadySignIn) { %>
-							<div class="text-right small"><%= title %><br /><a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
-						<% } else { %>
-							<div class="text-right small"><%= title %><br /><a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
-						<% } %>
 					</div>
 				</div>
 				<div id="sample" class="collapse">
@@ -573,14 +745,22 @@
 				</div>
 				<div class="row">
 					<div class="col">
-						<textarea class="form-control my-1" id="message" name="message" title="メッセージを入力" placeholder="" maxlength="200" aria-describedby="hint"></textarea>
+						<textarea class="form-control my-1" id="message" name="message" title=""<%- __("メッセージを入力") %>" placeholder="<%- __("Enterキーで送信 Shift+Enterで改行") %>" maxlength="200" aria-describedby="hint"></textarea>
 					</div>
 					<div class="col-auto align-self-center pl-0" id="speechRecongizerButtonCol" hidden>
 						<button class="form-control btn btn-primary my-1 btn-sm" style="width: 120px" id="speechRecongizerButton"><%- __("音声入力") %></button>							
 					</div>
 				</div>
 				<button class="form-control btn btn-primary my-1" id="sendButton"><%- __("送信") %></button>	
-				<div class="text-center my-1 small" id="hint"><%- __("Enterキーで送信 Shift+Enterで改行") %></div>
+				<div class="row">
+					<div class="col align-self-center">
+						<% if (isAlreadySignIn) { %>
+							<div class="text-center small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
+						<% } else { %>
+							<div class="text-center small"><%= title %> - <a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
+						<% } %>
+					</div>
+				</div>
 			</div>
 		</div>
 	</body>

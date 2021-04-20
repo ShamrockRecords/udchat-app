@@ -48,6 +48,7 @@ router.get('/', wrap(async function(req, res, next) {
     if ((data.passcode != '' && data.ownerUid != uid) || name == null) {
         if (req.session.passcode != data.passcode) {
             res.render('passcode', {
+                lang: res.locale,
                 title: data.name,
                 displayName: name != null ? name : '',
                 isAlreadySignIn: isAlreadySignIn,
@@ -66,6 +67,7 @@ router.get('/', wrap(async function(req, res, next) {
     }
 
     res.render('chat', {
+        lang: res.locale,
         title: data.name,
         name: name,
         requestId: chatId,

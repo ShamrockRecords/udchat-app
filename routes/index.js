@@ -3,6 +3,7 @@ let admin = require('firebase-admin');
 let firebaseSession = require('../models/firebase_session.js') ;
 var router = express.Router() ;
 const i18n = require('i18n') ;
+const { response } = require('express');
 
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 
@@ -38,6 +39,7 @@ router.get('/', wrap(async function(req, res, next) {
     }
 
     res.render('index', {
+        lang: res.locale,
         name: name == null ? "" : name,
         rootURL: process.env.ROOT_URL,
         chats: chats,
@@ -68,5 +70,62 @@ router.get('/signout', wrap(async function(req, res, next) {
 		res.redirect('/') ;
 	}) ;
 })) ;
+
+router.get('/download', wrap(async function(req, res, next) {
+	let result = await firebaseSession.enter(req, res) ;
+
+    if (!result) {
+        res.redirect('/signin');
+        return ;
+    }
+
+    let currentUser = req.session.user ;
+    let chatId = req.query.chatId ;
+    let data = {} ;
+
+    if (chatId != undefined) {
+        let doc = await admin.firestore().collection("chats").doc(chatId).get() ;
+        data = doc.data() ;
+
+        if (data.ownerUid != currentUser.uid) {
+            res.redirect('/');
+            return ;
+        }
+    }
+    
+    let reqestedTimezoneOffset = req.query.to ;
+    let targetDate = new Date() ;
+
+    targetDate.setDate(targetDate.getDate() - 3) ;
+
+    let snapshot = await admin.firestore().collection("chat").doc(chatId).collection("messages").where("timestamp", ">", targetDate).orderBy('timestamp').get() ;
+ 
+    res.setHeader('Content-Disposition', "attachment; filename*=UTF-8''" + encodeURIComponent(data.name) + '.csv');
+    
+    let line = '#timestamp,name,message\r\n' ;
+
+    res.write(line) ;
+
+    for (let key in snapshot.docs) {
+        let doc = snapshot.docs[key] ;
+        let command = doc.data() ;
+
+        if (command.method == 'status') {
+            continue ;
+        }
+
+        let date = new Date(command.timestamp.toDate().toUTCString()) ;
+
+        date.setHours(date.getHours() + (date.getTimezoneOffset() - reqestedTimezoneOffset)/60) ;
+
+        let line = '"' + date.toLocaleString('ja-JP') + '"' + ',' + command.name + ',' + command.message + "\r\n" ;
+
+        res.write(line) ;
+    }
+    
+    res.end() ;
+})) ;
+
+
 
 module.exports = router;
