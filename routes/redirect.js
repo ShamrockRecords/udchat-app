@@ -11,7 +11,8 @@ router.get('/', async function(req, res, next) {
         return ;
     }
 
-    res.write(JSON.stringify(req.body)) ;
+    //res.write(JSON.stringify(req.body)) ;
+    res.write(JSON.stringify(req.query)) ;
     res.end() ;	 
 }) ;
 
