@@ -16,7 +16,9 @@
     "firebase-admin": "^9.6.0",
     "http-errors": "~1.6.3",
     "i18n": "^0.13.2",
+    "js-base64": "^3.6.0",
     "morgan": "~1.9.1",
+    "node-fetch": "^2.6.1",
     "node-uuid": "^1.4.8",
     "socket.io": "^4.0.1"
   }

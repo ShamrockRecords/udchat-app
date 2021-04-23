@@ -3,7 +3,14 @@ let firebaseSession = require('../models/firebase_session.js') ;
 
 let router = express.Router();
 
-router.get('/', function(req, res, next) {
+router.get('/', async function(req, res, next) {
+	let result = await firebaseSession.enter(req, res) ;
+
+    if (result) {
+        res.redirect('/');
+        return ;
+    }
+
 	let chatId = req.query.chatId ;
 
 	res.render('signup', {
