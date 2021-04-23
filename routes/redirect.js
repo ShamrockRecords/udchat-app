@@ -8,6 +8,9 @@ let Base64 = require('js-base64');
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 
 router.get('/', wrap(async function(req, res, next) {
+    res.redirect('/signin');
+    
+    /*
     let result = await firebaseSession.enter(req, res) ;
 
     if (!result) {
@@ -25,6 +28,7 @@ router.get('/', wrap(async function(req, res, next) {
 
     res.write(JSON.stringify(data)) ;
     res.end() ;	 
+    */
 })) ;
 
 module.exports = router;
