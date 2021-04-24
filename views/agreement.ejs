@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="<%= lang %>">
+	<head>
+		<%- include('parts/head', {title: ""}) %>
+	</head>
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light text-dark bg-dark">
+			<a class="navbar-brand text-white" href="/"><%- __("UD Chat") %></a>
+		</nav>
+		
+		<%- include('parts/lang', {}) %>
+
+		<%- include('aboutBody', {}) %>
+
+		<div class="container p-3 text-center">
+			<form method="POST" action="/agreement">
+				
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary"><%- __("UD Chatを使う") %></button>
+				</div>
+			</form>
+		</div>
+
+		<%- include('parts/footer', {}) %>
+	</body>
+</html>
