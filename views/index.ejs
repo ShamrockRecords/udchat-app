@@ -45,7 +45,7 @@
 			</div>
 			<% } %>
 		</div>
-		
+	
 		<div class="container p-3">
 			<button class="btn btn-primary" onclick="location.href='/create'"><%- __("チャットを作成") %></button>
 		</div>
@@ -66,10 +66,10 @@
 					</tr>
 					<tr>
 						<td class="text-right" colspan="2">
-							<button class="btn btn-primary" id="command" onclick="window.open('/chat?chatId=<%= chat.chatId %>', '_blank');"><%- __("開く") %></button>
-							<button class="btn btn-success" id="command" onclick="copyToClipboard('<%= chat.chatId %>')"><%- __("コピー") %></button>
-							<button class="btn btn-primary" id="command" onclick="location.href='/create?chatId=<%= chat.chatId %>'"><%- __("編集") %></button>
-							<button class="btn btn-danger" id="command" onclick="location.href='/delete?chatId=<%= chat.chatId %>'"><%- __("削除") %></button>
+							<button class="btn btn-primary my-1" id="command" onclick="window.open('/chat?chatId=<%= chat.chatId %>', '_blank');"><%- __("開く") %></button>
+							<button class="btn btn-success my-1" id="command" onclick="copyToClipboard('<%= chat.chatId %>')"><%- __("コピー") %></button>
+							<button class="btn btn-primary my-1" id="command" onclick="location.href='/create?chatId=<%= chat.chatId %>'"><%- __("編集") %></button>
+							<button class="btn btn-danger my-1" id="command" onclick="location.href='/delete?chatId=<%= chat.chatId %>'"><%- __("削除") %></button>
 						</td>
 					</tr>
 					<tr>

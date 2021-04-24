@@ -38,6 +38,13 @@
 					<% } %>
 					<button class="btn btn-danger" onclick="location.href='/'"><%- __("キャンセル") %></button>
 				</div>
+				<script>
+					$(function() {
+						$('form').submit(function() {
+							$(this).find(':submit').attr('disabled', 'disabled') ;
+					  	});
+					});
+				</script>
 			</form>
 		</div>
 		<%- include('parts/footer', {}) %>
