@@ -44,6 +44,10 @@
                 <strong><%- __("自動翻訳機能付きグループチャット") %></strong>
                 <h1 class='h1'><%- __("UD Chat") %></h1>
             </div>
+
+            <div class="container">
+                <div id="firebaseui-auth-container"></div>
+            </div>
             
             <form class="form-signin" method="post" action="/signup">
                 <h1 class="h3 mb-3 font-weight-normal"><%- __("サインアップ") %></h1>
@@ -69,10 +73,6 @@
                     </div>
                 <% } %>
             </form>
-
-            <div class="container">
-                <div id="firebaseui-auth-container"></div>
-            </div>
 
             <div class="container">
                 <a href="/about"><%- __("ご利用について") %></a>
