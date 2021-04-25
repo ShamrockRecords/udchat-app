@@ -27,24 +27,51 @@ router.get('/', wrap(async function(req, res, next) {
         chats[data.chatId] = data ;
     }
 
-    let name = null ;
+    let userProfile = null ;
 
     {
         let doc = await admin.firestore().collection("users").doc(currentUser.uid).get() ;
-        let userProfile = doc.data() ;
+        userProfile = doc.data() ;
 
-        if (userProfile != null) {
-            name = userProfile.name ;
+        if (userProfile == null) {
+            userProfile = {name: '', agreement: '0'} ;
+            await admin.firestore().collection("users").doc(currentUser.uid).set(userProfile) ;
         }
     }
 
-    res.render('index', {
-        lang: res.locale,
-        name: name == null ? "" : name,
-        rootURL: process.env.ROOT_URL,
-        chats: chats,
-        errorMessage: name == null ? res.__("まず最初にプロフィールで名前を入力してください。") : "",
-    });		 
+    if (userProfile.agreement == '1') {
+        res.render('index', {
+            lang: res.locale,
+            name: userProfile.name,
+            rootURL: process.env.ROOT_URL,
+            chats: chats,
+            errorMessage: userProfile.name == '' ? res.__("プロフィールに名前を入力してください。") : "",
+        });
+    } else {
+        res.render('agreement', {
+            lang: res.locale,
+        });
+    }
+})) ;
+
+router.post('/agreement', wrap(async function(req, res, next) {
+    let result = await firebaseSession.enter(req, res) ;
+
+    if (!result) {
+        res.redirect('/signin');
+        return ;
+    }
+
+    let currentUser = req.session.user ;
+
+    let doc = await admin.firestore().collection("users").doc(currentUser.uid).get() ;
+    let userProfile = doc.data() ;
+
+    userProfile.agreement = '1' ;
+
+    await admin.firestore().collection("users").doc(currentUser.uid).set(userProfile) ;
+
+    res.redirect('/');
 })) ;
 
 router.get('/delete', wrap(async function(req, res, next) {
@@ -125,7 +152,5 @@ router.get('/download', wrap(async function(req, res, next) {
     
     res.end() ;
 })) ;
-
-
 
 module.exports = router;

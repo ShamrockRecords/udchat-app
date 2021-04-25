@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light text-dark bg-dark">
+<nav class="navbar navbar-expand-md navbar-light text-dark bg-dark">
     <a class="navbar-brand text-white" href="/"><%- __("UD Chat") %></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -14,11 +14,20 @@
             <li class="nav-item">
                 <a class="nav-link text-white" href="/about"><%- __("ご利用について") %></a>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link text-white dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <%- __("言語選択") %>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="/locale_change/ja"><%- __("日本語") %></a></li>
+                    <li><a class="dropdown-item" href="/locale_change/en"><%- __("英語") %></a></li>
+                    <li><a class="dropdown-item" href="/locale_change/zh-TW"><%- __("繁体字") %></a></li>
+                    <li><a class="dropdown-item" href="/locale_change/zh-CN"><%- __("簡体字") %></a></li>
+                </ul>
+            </li>
             <li class="nav-item">
                 <a class="nav-link text-white" href="/signout"><%- __("サインアウト") %></a>
             </li>
         </ul>
     </div>
 </nav>
-
-<%- include('lang', {}) %>

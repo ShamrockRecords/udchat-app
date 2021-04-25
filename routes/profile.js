@@ -47,7 +47,7 @@ router.post('/update', wrap(async function(req, res, next) {
     }
 
     try {
-        await admin.firestore().collection("users").doc(user.uid).set(data) ;
+        await admin.firestore().collection("users").doc(user.uid).update(data) ;
     } catch (error) {
         req.session.errorMessage = error.message ;
     }
