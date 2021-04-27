@@ -6,7 +6,7 @@ let router = express.Router();
 router.get('/', async function(req, res, next) {
 	let result = await firebaseSession.enter(req, res) ;
 
-    if (result) {
+    if (result == 0) {
         res.redirect('/');
         return ;
     }
@@ -36,7 +36,7 @@ router.post('/', function(req, res, next) {
 	let chatId = req.body.chatId ;
 
 	firebaseSession.signIn(req, res, (result, email, errorMessage) => {
-		if (result) {
+		if (result == 0) {
 			if (chatId != undefined && chatId != '') {
 				res.redirect('/chat?chatId=' + chatId) ;
 			} else {

@@ -72,7 +72,7 @@ class firebaseSession {
         let sessionCookie = req.cookies.sessionCookie ;
 
         if (sessionCookie == undefined) {
-            return false ;
+            return 1 ;
         }
 
         let decodedClaims = null ;
@@ -88,9 +88,9 @@ class firebaseSession {
 
             await firebase.auth().signOut() ;
             
-            return true ;
+            return 0 ;
         } catch(e) {
-            return false ;
+            return -1 ;
         }
     }
 
@@ -118,34 +118,37 @@ class firebaseSession {
             req.session.user = user ;
             res.cookie('sessionCookie', sessionCookie, {maxAge: expiresIn, httpOnly: false});
 
-            completion(true, email, '') ;
+            completion(0, email, '') ;
         } catch(error) {
             await firebase.auth().signOut() ;
             res.clearCookie('sessionCookie') ;
             delete req.session.user ;
 
-            completion(false, email, error.message) ;
+            completion(-1, email, error.message) ;
         }
     }
 
     async signInFromUI(uid, res) {    
         try {
-        let customToken = await admin.auth().createCustomToken(uid) ;
+            let customToken = await admin.auth().createCustomToken(uid) ;
 
-		let userRecord = await firebase.auth().signInWithCustomToken(customToken) ;
-		let user = userRecord.user ;
+            let userRecord = await firebase.auth().signInWithCustomToken(customToken) ;
+            let user = userRecord.user ;
 
-		let idToken = await user.getIdToken() ;
+            let idToken = await user.getIdToken() ;
 
-        const expiresIn = 60 * 60 * 24 * 14 * 1000;
-        
-		let sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
+            const expiresIn = 60 * 60 * 24 * 14 * 1000;
+            
+            let sessionCookie = await admin.auth().createSessionCookie(idToken, {expiresIn}) ;
 
-		res.cookie('sessionCookie', sessionCookie, {maxAge: expiresIn, httpOnly: false});
+            res.cookie('sessionCookie', sessionCookie, {maxAge: expiresIn, httpOnly: false});
 
-		await firebase.auth().signOut() ;
+            await firebase.auth().signOut() ;
+
+            return 0 ;
         } catch (e) {
             console.log(e) ;
+            return -1 ;
         }
     }
 
@@ -161,13 +164,13 @@ class firebaseSession {
 
             await firebase.auth().signOut() ;
 
-            completion(true, email, '') ;
+            completion(0, email, '') ;
         } catch (error) {
             await firebase.auth().signOut() ;
             res.clearCookie('sessionCookie') ;
             delete req.session.user ;
 
-            completion(false, email, error.message) ;
+            completion(-1, email, error.message) ;
         }
     }
 
