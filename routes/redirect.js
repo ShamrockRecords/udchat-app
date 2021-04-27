@@ -13,7 +13,7 @@ router.get('/', wrap(async function(req, res, next) {
     /*
     let result = await firebaseSession.enter(req, res) ;
 
-    if (!result) {
+    if (result != 0) {
         res.redirect('/signin');
         return ;
     }

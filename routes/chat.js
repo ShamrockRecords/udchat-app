@@ -84,7 +84,7 @@ router.post('/passcode', wrap(async function(req, res, next) {
     /*
     let result = await firebaseSession.enter(req, res) ;
     
-    if (!result) {
+    if (result != 0) {
         if (chatId != undefined) {
             res.redirect('/signin?chatId=' + chatId);
         } else {

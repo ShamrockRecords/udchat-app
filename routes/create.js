@@ -9,7 +9,7 @@ const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 router.get('/', wrap(async function(req, res, next) {
     let result = await firebaseSession.enter(req, res) ;
 
-    if (!result) {
+    if (result != 0) {
         res.redirect('/signin');
         return ;
     }
@@ -37,7 +37,7 @@ router.get('/', wrap(async function(req, res, next) {
 router.post('/', wrap(async (req, res, next) => {
     let result = await firebaseSession.enter(req, res) ;
 
-    if (!result) {
+    if (result != 0) {
         res.redirect('/signin');
         return ;
     }

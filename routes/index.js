@@ -10,7 +10,7 @@ const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 router.get('/', wrap(async function(req, res, next) {
     let result = await firebaseSession.enter(req, res) ;
 
-    if (!result) {
+    if (result != 0) {
         res.redirect('/signin');
         return ;
     }
@@ -57,7 +57,7 @@ router.get('/', wrap(async function(req, res, next) {
 router.post('/agreement', wrap(async function(req, res, next) {
     let result = await firebaseSession.enter(req, res) ;
 
-    if (!result) {
+    if (result != 0) {
         res.redirect('/signin');
         return ;
     }
@@ -77,7 +77,7 @@ router.post('/agreement', wrap(async function(req, res, next) {
 router.get('/delete', wrap(async function(req, res, next) {
     let result = await firebaseSession.enter(req, res) ;
 
-    if (!result) {
+    if (result != 0) {
         res.redirect('/signin');
         return ;
     }
@@ -101,7 +101,7 @@ router.get('/signout', wrap(async function(req, res, next) {
 router.get('/download', wrap(async function(req, res, next) {
 	let result = await firebaseSession.enter(req, res) ;
 
-    if (!result) {
+    if (result != 0) {
         res.redirect('/signin');
         return ;
     }
