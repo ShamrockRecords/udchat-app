@@ -1,6 +1,13 @@
-<div class="container p-2">
-    <a class="btn btn-info btn-sm my-1" style="width: 80px" href="/locale_change/ja"><%- __("日本語") %></a>
-    <a class="btn btn-info btn-sm my-1" style="width: 80px" href="/locale_change/en"><%- __("英語") %></a>
-    <a class="btn btn-info btn-sm my-1" style="width: 80px" href="/locale_change/zh-TW"><%- __("繁体字") %></a>
-    <a class="btn btn-info btn-sm my-1" style="width: 80px" href="/locale_change/zh-CN"><%- __("簡体字") %></a>
+<div class="container p-3 my-3">
+    <div class="dropdown text-right">
+        <a class="dropdown-toggle" href="#" id="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <%- __("言語選択") %>
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="dropdown">
+            <li><a class="dropdown-item" href="/locale_change/ja"><%- __("日本語") %></a></li>
+            <li><a class="dropdown-item" href="/locale_change/en"><%- __("英語") %></a></li>
+            <li><a class="dropdown-item" href="/locale_change/zh-TW"><%- __("繁体字") %></a></li>
+            <li><a class="dropdown-item" href="/locale_change/zh-CN"><%- __("簡体字") %></a></li>
+        </ul>
+    </div>
 </div>
