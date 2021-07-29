@@ -18,7 +18,7 @@ router.get('/', wrap(async function(req, res, next) {
         return ;
     }
 
-    let token = Base64.encode('RjVhuFOlQ5C5TBe_eraM_A' + ':' + process.env.CLIENT_SECRET);
+    let token = Base64.encode('RjVhuFOlQ5C5TBe_eraM_A' + ':' + process.env.ZOOM_ZOOM_CLIENT_SECRET);
     
     let URL = "https://zoom.us/oauth/token?grant_type=authorization_code&code=" + req.query.code + "&redirect_uri=" + "https%3A%2F%2Fudchat-staging.herokuapp.com%2Fredirect" ;
 
