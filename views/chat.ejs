@@ -386,7 +386,7 @@
 				let languages = await supportedLanguages("<%= apiKey %>") ;
 				let locales = getSupportedSpeechRecognitionLocales() ;
 
-				initLauguageSelect('languages', getDefaultLanguage(), '', languages) ;
+				initLauguageSelect('languages', getDefaultLanguage(), '<%- __("なし") %>', languages) ;
 				initLauguageSelect('inputLanguages', '', '<%- __("自動判別") %>', languages) ;
 				initLauguageSelect('reverseTranslationLanguages', '', '<%- __("なし") %>', languages) ;
 				initLauguageSelect('speechRecognitionLocales', '', '<%- __("ブラウザ設定") %>', locales) ;
