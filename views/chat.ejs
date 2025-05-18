@@ -560,7 +560,7 @@
 			}
 
 			function initLauguageSelect(tag, defaultLanguage, defaultOption, languages) {					
-				if (localStorage.getItem(tag)) {
+				if (localStorage.getItem(tag) != undefined) {
 					defaultLanguage = localStorage.getItem(tag) ;
 				}
 
@@ -569,11 +569,12 @@
 
 					option.attr("value", '') ;
 					option.text(defaultOption) ;
-					$('#' + tag).append(option) ;
 
 					if (defaultLanguage == "") {
 						option.prop('selected', true) ;
 					}
+
+					$('#' + tag).append(option) ;
 				}
 
 				for (let key in languages) {
@@ -581,7 +582,7 @@
 
 					option.attr("value", languages[key].language) ;
 
-					if (defaultLanguage == languages[key].language) {
+					if (defaultLanguage != "" && defaultLanguage == languages[key].language) {
 						option.prop('selected', true) ;
 					}
 

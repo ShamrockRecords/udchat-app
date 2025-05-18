@@ -23,7 +23,7 @@ async function translate(apiKey, message, from, to, completion) {
         return ;
     }
 
-    if (from != to) {
+    if (to != "" && from != to) {
         let URL = "https://translation.googleapis.com/language/translate/v2?key=" + apiKey ;
         
         if (from != '') {
