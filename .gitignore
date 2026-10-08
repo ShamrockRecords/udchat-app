@@ -108,3 +108,8 @@ firebase-adminsdk.json
 
 # vscode
 .vscode
+
+# Local overrides and OS metadata
+.env.*
+!.env.example
+.DS_Store

@@ -1,86 +1,26 @@
 <!doctype html>
 <html lang="<%= lang %>">
-    <head>
-        <title><%- __("UD Chat") %> - <%- __("サインアップ") %></title>
-        <%- include('parts/head', {}) %>
-        <link href="stylesheets/signin.css" rel="stylesheet">
-
-        <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth__ja.js"></script>
-        <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
-
-        <% if (config.apiKey != '') { %>
-        <script>  
-            var config = {
-                apiKey: "<%= config.apiKey %>",
-                authDomain: "<%= config.authDomain %>",
-                projectId: "<%= config.projectId %>",
-                storageBucket: "<%= config.storageBucket %>",
-                messagingSenderId: "<%= config.messagingSenderId %>",
-                appId: "<%= config.appId %>",
-                measurementId: "<%= config.measurementId %>"
-            };
-
-            firebase.initializeApp(config);
-
-            var uiConfig = {
-                signInSuccessUrl: '/auth_done',
-                signInOptions: [
-                    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-                    firebase.auth.TwitterAuthProvider.PROVIDER_ID
-                ],
-            };
-
-            var ui = new firebaseui.auth.AuthUI(firebase.auth());
-            ui.start('#firebaseui-auth-container', uiConfig);   
-        </script>
-        <% } %>
-    </head>
-    <body>
-        <div class="container text-center">
-            <div class="container p-2">
-                <%- include('parts/lang', {}) %>
-                <strong><%- __("自動翻訳機能付きグループチャット") %></strong>
-                <h1 class='h1'><%- __("UD Chat") %></h1>
-            </div>
-
-            <div class="container">
-                <div id="firebaseui-auth-container"></div>
-            </div>
-            
+<head><title>UD Chat — <%= __('サインアップ') %></title><%- include('parts/head') %><link href="/stylesheets/signin.css" rel="stylesheet"></head>
+<body class="auth-page">
+    <header class="auth-header"><a class="brand" href="/"><%- include('parts/brand') %></a><%- include('parts/lang') %></header>
+    <main class="auth-layout">
+        <%- include('parts/auth_story') %>
+        <section class="auth-card" aria-labelledby="authTitle">
+            <p class="eyebrow">WELCOME TO UD CHAT</p>
+            <h2 id="authTitle"><%= __('サインアップ') %></h2>
             <form class="form-signin" method="post" action="/signup">
-                <h1 class="h3 mb-3 font-weight-normal"><%- __("サインアップ") %></h1>
-                <label for="inputEmail" class="sr-only"><%- __("メールアドレス") %></label>
-                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="<%- __("メールアドレス") %>" required autofocus>
-                <label for="inputPassword" class="sr-only"><%- __("パスワード") %></label>
-                <input type="password" name="password" id="inputPassword" class="form-control" placeholder="<%- __("パスワード") %>" required>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="hidden" name="chatId" value="<%= chatId %>">
-                <button class="btn btn-lg btn-primary btn-block" type="submit"><%- __("サインアップ") %></button>
-                <div class="my-3">
-                    <strong><%- __("サインアップ後に認証メールが届きます") %></strong>
-                </div>
-                <div class="my-3">
-                    <% if (chatId != '') { %>
-                        <a href="/signin?chatId=<%= chatId %>"><%- __("サインインに戻る") %></a>
-                    <% } else { %>
-                        <a href="/signin"><%- __("サインインに戻る") %></a>
-                    <% } %>
-                </div>
-                <% if (errorMessage != '') { %>
-                    <div class="alert alert-primary my-3" role="alert">
-                        <%= errorMessage %>
-                    </div>
-                <% } %>
+                <div class="form-group"><label for="inputEmail"><%= __('メールアドレス') %></label><input type="email" name="email" id="inputEmail" class="form-control" placeholder="name@example.com" autocomplete="email" required></div>
+                <div class="form-group"><label for="inputPassword"><%= __('パスワード') %></label><input type="password" name="password" id="inputPassword" class="form-control" autocomplete="new-password" required></div>
+                <% if (errorMessage) { %><div class="alert alert-primary" role="alert"><%= errorMessage %></div><% } %>
+                <button class="btn btn-primary btn-block" type="submit"><%= __('サインアップ') %> <span aria-hidden="true">→</span></button>
+                <p class="auth-notice"><%= __('サインアップ後に認証メールが届きます') %></p>
             </form>
-
-            <div class="container">
-                <a href="/about"><%- __("ご利用について") %></a>
-            </div>
-            <div class="container">
-                <p class="my-3 text-muted"><%- __("©︎ 2021 Shamrock Records, Inc. CC BY 4.0") %></p>
-            </div>
-        </div>
-    </body>
+            <%- include('parts/firebase_login', { config, chatId }) %>
+            <div class="auth-links"><a href="/signin<%= chatId ? '?chatId=' + encodeURIComponent(chatId) : '' %>"><%= __('サインインに戻る') %></a></div>
+        </section>
+    </main>
+    <%- include('parts/footer') %><a class="auth-footer-link" href="/about"><%= __('ご利用について') %></a>
+</body>
 </html>
-

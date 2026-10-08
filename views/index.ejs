@@ -1,110 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="<%= lang %>">
-  	<head>
-		<title><%- __("UD Chat") %> - <%- __("トップページ") %></title>
-    	<%- include('parts/head', {}) %>
-  	</head>
-	  <script>
-		  function copyToClipboard(id) {
-			// コピー対象をJavaScript上で変数として定義する
-			var copyTarget = document.getElementById(id);
-			// コピー対象のテキストを選択する
-			copyTarget.select();
-			// 選択しているテキストをクリップボードにコピーする
-			document.execCommand("Copy");
-			// コピーをお知らせする
-			alert('<%- __("クリップボードにコピーしました。") %>');
-		}
-
-		function onClickSaveContentsButton(chatId) {
-			let date = new Date() ;
-
-			location.href='/download?chatId=' + chatId + '&to=' + date.getTimezoneOffset() ;
-		}
-
-	  </script>
-	  <style>
-		  #command {
-			width: 80px;
-		  }
-	  </style>
-  	<body>
-		<%- include('parts/nav_bar', {}) %>
-		<div class="container p-3">
-			<% if (errorMessage == ''){ %>
-			<div class="row">
-				<div class="col p-3">
-					<h1><%- __("ようこそ") %> <%= name %> <%- __("さん") %></h1>
-				</div>
-			</div>
-			<% } else { %>
-			<div class="row">
-				<div class="col p-3">
-					<div class="alert alert-info" role="alert"><%= errorMessage %></div>
-				</div>
-			</div>
-			<% } %>
-		</div>
-	
-		<div class="container p-3">
-			<div class="row">
-				<div class="col p-3">
-					2025.5.19 翻訳言語の選択肢に「なし」を追加しました。翻訳しないでメッセージのやり取りをすることができます。
-				</div>
-			</div>
-		</div>
-
-		<div class="container p-3">
-			<button class="btn btn-primary" onclick="location.href='/create'"><%- __("チャットを作成") %></button>
-		</div>
-
-		<div class="container p-3">
-			<table class="table">
-			<% for (let key in chats) { %>
-				<% let chat = chats[key] ; %>
-				<table class="table border p-3">
-					<tr>
-						<td class="h3"><strong><%= chat.name %></strong></td>
-
-						<% if (chat.passcode != undefined && chat.passcode != '') { %>
-							<td class="text-right"><%- __("パスコード：") %> <%= chat.passcode %></td>
-						<% } else { %>
-							<td></td>
-						<% } %>
-					</tr>
-					<tr>
-						<td class="text-right" colspan="2">
-							<button class="btn btn-primary my-1" id="command" onclick="window.open('/chat?chatId=<%= chat.chatId %>', '_blank');"><%- __("開く") %></button>
-							<button class="btn btn-success my-1" id="command" onclick="copyToClipboard('<%= chat.chatId %>')"><%- __("コピー") %></button>
-							<button class="btn btn-primary my-1" id="command" onclick="location.href='/create?chatId=<%= chat.chatId %>'"><%- __("編集") %></button>
-							<button class="btn btn-danger my-1" id="command" onclick="location.href='/delete?chatId=<%= chat.chatId %>'"><%- __("削除") %></button>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<textarea id="<%= chat.chatId %>" style="resize: none; width: 100%" readonly aria-describedby="<%= chat.chatId %>Help"><%= rootURL %>/chat?chatId=<%= chat.chatId %></textarea>
-							<small id="<%= chat.chatId %>Help" class="form-text text-muted"><%- __("URLをコピーしてチャットをしたい相手に送ったりサイトに掲載してください。") %></small>
-						</td>
-					</tr>
-					<tr>
-						<td class="small" colspan="2">
-							<div class="row">
-								<div class="col-auto">
-									<button class="btn btn-info" onClick="onClickSaveContentsButton('<%= chat.chatId %>')"><%- __("内容を保存") %></button>
-								</div>
-								<div class="col">
-									<%- __("3日前からの記録をCSVデータでダウンロードします。") %>
-								</div>
-							</div>
-						</td>
-					</tr>
-				</table>
-			<% } %>
-			</table>
-		</div>
-	
-		<div class="container p-3"></div>
-		<%- include('parts/footer', {}) %>
-		</div>
-  	</body>
-</html>
+<head><title>UD Chat — <%= __('トップページ') %></title><%- include('parts/head') %></head>
+<body>
+    <%- include('parts/nav_bar') %>
+    <main class="page-shell">
+        <header class="page-heading"><div><p class="eyebrow">YOUR WORKSPACE</p><h1><%= __('ようこそ') %> <%= name %> <%= __('さん') %></h1><p><%= __('会話のつづきを、ここから。') %></p></div><a class="btn btn-primary" href="/create"><i class="fas fa-plus" aria-hidden="true"></i><%= __('チャットを作成') %></a></header>
+        <% if (errorMessage) { %><div class="alert alert-info" role="alert"><%= errorMessage %></div><% } %>
+        <div class="section-heading"><h2><%= __('チャットルーム') %></h2><span class="count-badge"><%= Object.keys(chats).length %></span></div>
+        <% if (Object.keys(chats).length === 0) { %><section class="empty-state"><span class="room-symbol" aria-hidden="true"><i class="far fa-comments"></i></span><h3><%= __('最初のチャットを作りましょう') %></h3><p><%= __('チャットを作ったらURLをコピーして送るだけ。') %></p><a class="btn btn-primary" href="/create"><%= __('チャットを作成') %></a></section><% } %>
+        <div class="room-grid">
+        <% for (const chat of Object.values(chats)) { %>
+            <article class="room-card">
+                <header class="room-card-header"><span class="room-symbol" aria-hidden="true"><i class="far fa-comments"></i></span><div><h3><%= chat.name %></h3><div class="room-access"><i class="fas <%= chat.passcode ? 'fa-lock' : 'fa-link' %>" aria-hidden="true"></i><% if (chat.passcode) { %><%= __('パスコード：') %> <%= chat.passcode %><% } else { %><%= __('リンクから参加') %><% } %></div></div></header>
+                <label class="sr-only" for="url-<%= chat.chatId %>"><%= __('共有リンク') %></label>
+                <div class="room-link"><input class="form-control" id="url-<%= chat.chatId %>" readonly value="<%= rootURL %>/chat?chatId=<%= encodeURIComponent(chat.chatId) %>"><button class="btn btn-light btn-sm copy-link" type="button" data-copy-target="url-<%= chat.chatId %>"><i class="far fa-copy" aria-hidden="true"></i><%= __('コピー') %></button></div>
+                <div class="room-actions"><a class="btn btn-primary btn-sm room-open" href="/chat?chatId=<%= encodeURIComponent(chat.chatId) %>" target="_blank" rel="noopener"><%= __('開く') %> <span aria-hidden="true">↗</span></a><a class="btn btn-light btn-sm" href="/create?chatId=<%= encodeURIComponent(chat.chatId) %>"><%= __('編集') %></a><form method="POST" action="/delete"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="chatId" value="<%= chat.chatId %>"><button class="btn btn-danger btn-sm" type="submit"><%= __('削除') %></button></form></div>
+                <div class="room-download"><a class="download-link" href="/download?chatId=<%= encodeURIComponent(chat.chatId) %>"><i class="fas fa-arrow-down" aria-hidden="true"></i> <%= __('内容を保存') %></a><small><%= __('3日前からの記録をCSVデータでダウンロードします。') %></small></div>
+            </article>
+        <% } %>
+        </div>
+        <p class="text-muted small mt-4"><i class="fas fa-link" aria-hidden="true"></i> <%= __('URLをコピーしてチャットをしたい相手に送ったりサイトに掲載してください。') %></p>
+        <p id="copyNotice" class="small" role="status"></p>
+    </main>
+    <%- include('parts/footer') %>
+    <script>
+        document.querySelectorAll('.copy-link').forEach(button => button.addEventListener('click', async () => {
+            const field = document.getElementById(button.dataset.copyTarget);
+            try {
+                if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(field.value);
+                else { field.select(); if (!document.execCommand('copy')) throw new Error('copy'); }
+                document.getElementById('copyNotice').textContent = <%- jsonForScript(__('クリップボードにコピーしました。')) %>;
+            } catch { field.focus(); field.select(); }
+        }));
+        document.querySelectorAll('.download-link').forEach(link => { link.href += '&to=' + new Date().getTimezoneOffset(); });
+    </script>
+</body></html>

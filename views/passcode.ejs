@@ -5,8 +5,8 @@
 		<%- include('parts/head', {}) %>
 	</head>
 	<body>
-		<nav class="navbar navbar-expand-lg navbar-light text-dark bg-dark">
-			<a class="navbar-brand text-white" href="/"><%- __("UD Chat") %></a>
+		<nav class="navbar navbar-expand-md navbar-light app-nav">
+			<a class="brand" href="/"><%- include('parts/brand') %></a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
@@ -14,20 +14,21 @@
 				<ul class="navbar-nav">
 					<% if (!isAlreadySignIn) { %>
 						<li class="nav-item">	
-							<a class="nav-link text-white" href="/signin?chatId=<%= chatId %>"><%- __("サインイン") %></a>
+							<a class="nav-link" href="/signin?chatId=<%= chatId %>"><%- __("サインイン") %></a>
 						</li>
 					<% } %>
 					<li class="nav-item">
-						<a class="nav-link text-white" href="/about"><%- __("ご利用について") %></a>
+						<a class="nav-link" href="/about"><%- __("ご利用について") %></a>
 					</li>
 				</ul>
 			</div>
 		</nav>
 		
-		<%- include('parts/lang', {}) %>
+		<main class="form-page join-page"><%- include('parts/lang', {}) %>
 
-		<div class="container p-3">
+		<div class="form-card"><header class="join-heading"><span class="room-symbol" aria-hidden="true"><i class="far fa-comments"></i></span><p class="eyebrow">YOU'RE INVITED</p><h1><%= title %></h1><p><%= __('名前を入力して、会話に参加しましょう。') %></p></header>
 			<form method="POST" action="/chat/passcode">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 				<div class="form-group">
 					<label for="displayName"><%- __("名前") %></label>
 					<input required type="text" maxlength="30" class="form-control" id="displayName" name="displayName" value="<%= displayName %>" aria-describedby="displayNameHelp">
@@ -42,7 +43,7 @@
 				<% } %>
 				<input type="hidden" name="chatId" value="<%= chatId %>">
 				<div class="form-group">
-					<button type="submit" class="btn btn-primary"><%- __("参加") %></button>
+					<button type="submit" class="btn btn-primary btn-block"><%- __("参加") %></button>
 				</div>
 				<script>
 					$(function() {
@@ -53,6 +54,7 @@
 				</script>
 			</form>
 		</div>
+        </main>
 		<%- include('parts/footer', {}) %>
 	</body>
 </html>

@@ -1,18 +1,18 @@
-<nav class="navbar navbar-expand-md navbar-light text-dark bg-dark">
-    <a class="navbar-brand text-white" href="/"><%- __("UD Chat") %></a>
+<nav class="navbar navbar-expand-md navbar-light app-nav">
+    <a class="brand" href="/"><%- include('brand') %></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link text-white" href="/signin"><%- __("サインイン") %></a>
+                <a class="nav-link" href="/signin"><%- __("サインイン") %></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white" href="/about"><%- __("ご利用について") %></a>
+                <a class="nav-link" href="/about"><%- __("ご利用について") %></a>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link text-white dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-expanded="false">
                     <%- __("言語選択") %>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">

@@ -5,115 +5,33 @@
 		<%- include('parts/head', {}) %>
 		<script src="/socket.io/socket.io.js"></script>
 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"></script>
-		
-		<style>
-			.top {
-				overflow-y: scroll;
-			}
 
-			.bottom {
-				padding:0;
-			}
-
-			html,
-			body,
-			#main 
-			{
-				padding:0;
-    			margin:0;
-				height:100%;
-				background-color:ghostwhite;
-			}
-
-			.right {
-				display:table; 
-				margin-left: auto;			
-			}
-
-			.left {
-				display:table;
-			}
-
-			a {
-				color:royalblue ;
-			}
-
-			.name {
-				font-size:smaller; 
-			}
-
-			.messageRight {
-				background-color: yellowgreen;
-			}
-
-			.messageLeft {
-				background-color:white;
-			}
-
-			.translation {
-				color: white;
-				background-color:mediumblue;
-			}
-
-			.reversetTranslation {
-				background-color:white;
-			}
-			
-			#speechRecongizerButton {
-				background-color:orangered;
-				border-color: orangered;
-			}
-
-			#notification {
-				z-index: 2;
-				position: absolute; 
-				background-color:gray;
-				color: white;
-			}
-
-			#members {
-				z-index: 2;
-				position: absolute; 
-				background-color:gray;
-				color: white;
-				opacity: 0.55;
-			}
-		
-			.modal{
-				display: none;
-				height: 100vh;
-				position: fixed;
-				top: 0;
-				width: 100%;
-			}
-
-			.modal__bg{
-				background: rgba(0,0,0,0.8);
-				height: 100vh;
-				position: absolute;
-				width: 100%;
-			}
-
-			.modal__content{
-				background: #fff;
-				left: 50%;
-				position: absolute;
-				top: 50%;
-				transform: translate(-50%,-50%);
-				width: 300px;
-				height: 400px;
-			}
-		</style>
+        <link rel="stylesheet" href="/stylesheets/chat.css">
 		<script src="../javascripts/language_support.js"></script>
+        <script src="/javascripts/speech_recognition.js"></script>
 	</head>
-	<body class="p-3">
+	<body class="chat-page">
 		<script>
-			let socket = io();
+			// Keep the shareable room URL after a successful passcode form submission.
+            if (location.pathname === '/chat/passcode') {
+                history.replaceState(null, '', '/chat?chatId=' + encodeURIComponent(<%- jsonForScript(requestId) %>));
+            }
+            let socket = io({ autoConnect: false, auth: { token: <%- jsonForScript(chatToken) %> } });
+            socket.on('connect_error', error => {
+                document.getElementById('chat-error').textContent = error.message;
+                setConnectionState(false);
+            });
+            socket.on('chatError', error => {
+                document.getElementById('chat-error').textContent = error.message;
+            });
+            socket.on('disconnect', reason => {
+                setConnectionState(false);
+                document.getElementById('chat-error').textContent = reason === 'io server disconnect'
+                    ? 'Please reopen the chat.' : 'Reconnecting…';
+            });
 			let isBottom = true ;
 			let becameBackground = false ;
-			let isSpeechRecognizing = false ;
-			let uidMap = {} ;
+			let uidMap = Object.create(null);
 			let uidArray = [] ;
 
 			// When message came.
@@ -130,11 +48,11 @@
 
 						{
 							let command = {
-								requestId: "<%= requestId %>",
-								uid: "<%= uid %>",
-								name: "<%= name %>",
+								requestId: <%- jsonForScript(requestId) %>,
+								uid: <%- jsonForScript(uid) %>,
+								name: <%- jsonForScript(name) %>,
 								language: $('#inputLanguages option:selected').val(),
-								message: "<%= name %>" + '<%- __("が参加しました。") %>',
+								message: <%- jsonForScript(name) %> + '<%- __("が参加しました。") %>',
 								method: 'information',
 							} ;
 
@@ -160,42 +78,42 @@
 						command.reverseTranslation = escapeHTML(command.reverseTranslation) ;
 					}
 
-					command.message = command.message.replace("\n", "<br />") ;
-					command.message = command.message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank">$1</a> ')
+					command.message = command.message.replace(/\n/g, "<br />") ;
+					command.message = command.message.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a> ')
 
-					let element = $('<div class="p-3" style="width: 100%;">') ;
+					let element = $('<div class="message-group">') ;
 					
 					if (command.method == 'message' || command.method == 'information') {
-						if ("<%= uid %>" == command.uid) {
-							element.append($('<div class="right name px-2 my-1">').html(getDateString(timestamp))) ;
+						if (<%- jsonForScript(uid) %> == command.uid) {
+							element.append($('<div class="right message-meta">').html(getDateString(timestamp))) ;
 
 							if (command.method == 'information') {
 								readerTargetElement = $('<div class="right px-4 py-2 small">') ;
 								element.append(readerTargetElement.html(command.message)) ;
 							} else {
-								readerTargetElement = $('<div class="right messageRight rounded-pill px-4 py-2">') ;
+								readerTargetElement = $('<div class="right message-bubble messageRight">') ;
 								element.append(readerTargetElement.html(command.message)) ;
 							
 								if ((command.translation != undefined && command.translation != '') && 
 									(command.reverseTranslation != undefined && command.reverseTranslation != '')) {
-									element.append($('<div class="right messageRight rounded-pill reversetTranslation px-4 py-2">').html('<span style="font-size: small;">' + command.translation + '</span>' + '<br />' + command.reverseTranslation)) ;
+									element.append($('<div class="right message-bubble messageRight reversetTranslation">').html('<span style="font-size: small;">' + command.translation + '</span>' + '<br />' + command.reverseTranslation)) ;
 								}
 							}
 						} else {
-							element.append($('<div class="left name px-2 my-1">').html(command.name + " " + getDateString(timestamp))) ;
+							element.append($('<div class="left message-meta">').html('<span class="sender-name">' + command.name + '</span>' + getDateString(timestamp))) ;
 
 							if (command.method == 'information') {
 								readerTargetElement = $('<div class="left small">') ;
 								element.append(readerTargetElement.html(command.message)) ;
 							} else {
-								readerTargetElement = $('<div class="left messageLeft rounded-pill px-4 py-2">') ;
+								readerTargetElement = $('<div class="left message-bubble messageLeft">') ;
 								element.append(readerTargetElement.html(command.message)) ;
 							}
 
 							let translation = "" ;
 							
 							if (command.language != undefined && command.needsTranslating) {
-								await translate("<%= apiKey %>", command.message, command.language, $('#languages option:selected').val(), (t, from) => {
+								await translate(<%- jsonForScript(apiKey) %>, command.message, command.language, $('#languages option:selected').val(), (t, from) => {
 									translation = t ;
 									if (from != undefined) {
 										command.language = from ;
@@ -204,12 +122,17 @@
 							}
 
 							if (translation != "" && command.language != $('#languages option:selected').val()) {
-								readerTargetElement = $('<div class="left messageLeft rounded-pill translation px-4 py-2">') ;
-								element.append(readerTargetElement.html(translation)) ;
+								readerTargetElement = $('<div class="left message-bubble messageLeft translation">') ;
+								element.append(readerTargetElement.text($('<textarea>').html(translation).text())) ;
 							}
 						}
 
-						$('#messages').append(element);
+						if (command.method === 'information') {
+                            element.addClass('message-info').empty();
+                            readerTargetElement = $('<span>').html(command.message);
+                            element.append(readerTargetElement);
+                        }
+                        $('#messages').append(element);
 					} else if (command.method == 'status') {
 						updateMemberList(command) ;
 					}
@@ -224,7 +147,7 @@
 					let commnad = commands[key] ;
 
 					if (commnad.method != 'status') {
-						if (isBottom || "<%= uid %>" == commnad.uid) {
+						if (isBottom || <%- jsonForScript(uid) %> == commnad.uid) {
 							scrollToEnd() ;
 
 							if (becameBackground) {
@@ -235,8 +158,6 @@
 
 							$('#notification').prop('hidden', false) ;
 							$('#notification').show() ;
-							
-							offsetNotification() ;
 						}
 
 						break ;
@@ -249,20 +170,15 @@
 				$('#notification').hide() ;
 			}
 
-			function sendNewMessageNotification(message) {
-				if (Push.Permission.has()) {
-					Push.create('<%- __("APP_NAME") %> - <%= title %>', {
-					　　body: message,
-					　　icon: '',
-					　　timeout: 10000,
-					　　onClick: function() {
-						　　scrollToEnd() ;
-							$(window).focus() ;
-							this.close();
-					　　}
-					});
-				}
-			}
+            function sendNewMessageNotification(message) {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try {
+                        const notification = new Notification(<%- jsonForScript(__('APP_NAME') + ' - ' + title) %>, { body: message });
+                        notification.onclick = () => { scrollToEnd(); window.focus(); notification.close(); };
+                        setTimeout(() => notification.close(), 10000);
+                    } catch {}
+                }
+            }
 
 			function updateMemberList(command) {
 				if (command.param == 'joined') {
@@ -305,8 +221,6 @@
 					return ;
 				}
 
-				offsetMemebers() ;
-
 				$('#members').empty() ;
 				
 				let count = 0 ;
@@ -315,9 +229,9 @@
 					let command = uidMap[uidArray[key]] ;
 
 					if (command.param == 'focused') {
-						$('#members').append($('<div class="p-1 small" id="' + command.uid + '">').html('<strong>' + command.name + '<i class="far fa-eye m-1"></i></strong>')) ;
+						$('#members').append($('<div class="member is-focused">').attr('id', command.uid).text($('<textarea>').html(command.name).text()));
 					} else {
-						$('#members').append($('<div class="p-1 small" id="' + command.uid + '">').text(command.name)) ;
+						$('#members').append($('<div class="member">').attr('id', command.uid).text($('<textarea>').html(command.name).text()));
 					}
 
 					count++ ;
@@ -330,31 +244,23 @@
 				if (uidArray.length != count) {
 					$('#members').append($('<div class="p-1 small">').text('<%- __("他") %>' + (uidArray.length - count) + '<%- __("人参加しています") %>')) ;
 				}
-
-				offsetMemebers() ;
 				
-				if (Object.keys(uidMap).length == 0) {
-					$('#members').prop('hidden', true) ;
+				$('#memberCount').text(uidArray.length);
+                if (Object.keys(uidMap).length == 0) {
+					$('#membersPanel').prop('hidden', true) ;
 				}
 			}
 
 			//
-			function sendCommands(socket, commands) {
-				for (let key in commands) {
-					let command = commands[key] ;
-
-					command.name = unescapeHTML(command.name) ;
-					command.message = unescapeHTML(command.message) ;
-				}
-
-				socket.send(JSON.stringify(commands)) ;
-			}
+            function sendCommands(socket, commands) {
+                if (socket.connected) socket.send(JSON.stringify(commands));
+            }
 
 			//
 			function createStatusCommand(status) {
 				return {
-					requestId: "<%= requestId %>",
-					uid: "<%= uid %>",
+					requestId: <%- jsonForScript(requestId) %>,
+					uid: <%- jsonForScript(uid) %>,
 					name: $('#displayName').val(),
 					language: '',
 					message: '',
@@ -365,25 +271,25 @@
 
 			// Window loaded.
 			$(window).on('load', async function() {				
-				Push.Permission.request();
+				if ('Notification' in window && Notification.permission === 'default') {
+                    document.addEventListener('click', () => Notification.requestPermission().catch(() => {}), { once: true });
+                }
 
 				$('#messages').scroll(() => {
 					let clientHeight = $('#messages').get(0).clientHeight ;
 					let scrollHeight = $('#messages').get(0).scrollHeight ;
 
-					if (scrollHeight - (clientHeight + $('#messages').scrollTop()) == 0) {
+					if (scrollHeight - (clientHeight + $('#messages').scrollTop()) <= 4) {
     					isBottom = true ;
 						$('#notification').hide() ;
   					} else {
 						isBottom = false ;
 					}
 				}) ;
-				
-				resize() ;
 
 				$('#notification').hide() ;
 
-				let languages = await supportedLanguages("<%= apiKey %>") ;
+				let languages = await supportedLanguages(<%- jsonForScript(apiKey) %>) ;
 				let locales = getSupportedSpeechRecognitionLocales() ;
 
 				initLauguageSelect('languages', getDefaultLanguage(), '<%- __("なし") %>', languages) ;
@@ -391,20 +297,19 @@
 				initLauguageSelect('reverseTranslationLanguages', '', '<%- __("なし") %>', languages) ;
 				initLauguageSelect('speechRecognitionLocales', '', '<%- __("ブラウザ設定") %>', locales) ;
 				
-				{
-					let command = {
-						requestId: "<%= requestId %>",
-						uid: "<%= uid %>",
-						name: "<%= name %>",
-						language: '',
-						message: '',
-						method:'requestConnecting',
-					} ;
+                socket.on('connect', () => {
+                    document.getElementById('chat-error').textContent = '';
+                    setConnectionState(true);
+                    $('#messages').empty();
+                    uidMap = Object.create(null);
+                    uidArray = [];
+                    $('#members').empty();
+                    sendCommands(socket, [{ requestId: <%- jsonForScript(requestId) %>, method: 'requestConnecting' }]);
+                });
+                socket.connect();
 
-					sendCommands(socket, [command]) ;
-				}
-
-				initSpeechRecognition() ;
+				initSpeechRecognition();
+                $('#displayName').on('input', function() { $('#currentDisplayName').text(this.value); });
 
 				// resetTranslationSettingsButton was clicked.
 				$('#resetTranslationSettingsButton').on('click', () => {
@@ -425,18 +330,10 @@
 					$('#notification').hide() ;
 				}) ;
 
-				// settingButton was clicked.
-				$('#settingButton').on('click', () => {
-					setTimeout(() => {
-						resize() ;
-						$('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight},'fast');
-						$('#notification').hide() ;
-					}, 500);
-				}) ;
-
 				// sendButton was clicked.
 				$('#sendButton').on('click', () => {
-					let text = $('#message').val() ;
+					if (!socket.connected) return;
+                    let text = $('#message').val() ;
 
 					$('#message').val('') ;
 
@@ -445,23 +342,22 @@
 
 				// showMembersButton was clicked.
 				$('#showMembersButton').on('click', () => {
-					if ($('#members').prop('hidden')) {
-						$('#members').prop('hidden', false) ;
-
-						offsetMemebers() ;
+					if ($('#membersPanel').prop('hidden')) {
+						$('#membersPanel').prop('hidden', false) ;
 						
-						localStorage.setItem('showMembers', true) ;
+						localStorage.setItem('showMembers', true);
+                        $('#showMembersButton').attr('aria-expanded', 'true');
 					} else {
-						$('#members').prop('hidden', true) ;
+						$('#membersPanel').prop('hidden', true) ;
 
-						localStorage.setItem('showMembers', false) ;
+						localStorage.setItem('showMembers', false);
+                        $('#showMembersButton').attr('aria-expanded', 'false');
 					}
 				}) ;
 
-				if (localStorage.getItem('showMembers')) {
-					$('#members').prop('hidden', false) ;
-
-					offsetMemebers() ;
+				if (localStorage.getItem('showMembers') === 'true') {
+                    $('#showMembersButton').attr('aria-expanded', 'true');
+					$('#membersPanel').prop('hidden', false) ;
 				}
 				
 				// When user actived.
@@ -477,15 +373,11 @@
 				}) ;
 			}) ;
 
-			// Window size changed.
-			$(window).on('resize', function() {
-				resize() ;					
-			}) ;
-
 			// keypress detected.
-			$(document).keypress(function(e) {
-				if (!event.shiftKey &&　((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13))) {
-					let text = $('#message').val() ;
+			$(document).on('keydown', '#message', function(e) {
+				if (e.key === 'Enter' && !e.shiftKey && !e.originalEvent?.isComposing && e.keyCode !== 229) {
+					if (!socket.connected) return;
+                    let text = $('#message').val() ;
 
 					$('#message').val('') ;
 
@@ -494,27 +386,11 @@
 				}
 			}) ;
 		
-			function offsetMemebers() {
-				$('#members').offset({ 
-						top: 10,
-					left: $('#messages').get(0).clientWidth / 2 - $('#members').get(0).clientWidth / 2 +  $('#messages').offset().left,
-				});
-			}
-
-			function offsetNotification() {
-				$('#notification').offset({ 
-					top: $('#messages').get(0).clientHeight - $('#notification').get(0).clientHeight,
-					left: $('#messages').get(0).clientWidth / 2 - $('#notification').get(0).clientWidth / 2 +  $('#messages').offset().left,
-				});
-			}
-
-			function resize() {
-				$('#messages').height($('body').height() - $('#operation').height()) ;
-
-				offsetMemebers() ;
-
-				offsetNotification() ;
-			}
+            function setConnectionState(connected) {
+                $('#connectionStatus').toggleClass('is-connected', connected);
+                $('#connectionLabel').text(connected ? <%- jsonForScript(__('接続中')) %> : <%- jsonForScript(__('接続待機中')) %>);
+                $('#sendButton').prop('disabled', !connected);
+            }
 
 			// send message
 			async function send(text) {
@@ -522,7 +398,7 @@
 					let selectedInputLanguage = $('#inputLanguages option:selected').val() ;
 
 					if (selectedInputLanguage == '') {
-						await detect("<%= apiKey %>", text, (language) => {
+						await detect(<%- jsonForScript(apiKey) %>, text, (language) => {
 							selectedInputLanguage = language ;
 						}) ;
 					}
@@ -534,18 +410,18 @@
 					if (selectedReverseTranslationLanguage != '' &&
 						selectedInputLanguage != selectedReverseTranslationLanguage) {
 				
-						await translate("<%= apiKey %>", text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
+						await translate(<%- jsonForScript(apiKey) %>, text, selectedInputLanguage, selectedReverseTranslationLanguage, (t, from) => {
 							translation = unescapeHTML(t) ;
 						}) ;
 
-						await translate("<%= apiKey %>", translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
+						await translate(<%- jsonForScript(apiKey) %>, translation, selectedReverseTranslationLanguage, selectedInputLanguage, (t, from) => {
 							reverseTranslation = unescapeHTML(t) ;
 						}) ;
 					}
 
 					let command = {
-						requestId: "<%= requestId %>",
-						uid: "<%= uid %>",
+						requestId: <%- jsonForScript(requestId) %>,
+						uid: <%- jsonForScript(uid) %>,
 						name: $('#displayName').val(),
 						language: selectedInputLanguage,
 						message: text,
@@ -596,173 +472,96 @@
 				}) ;
 			}
 
-			function initSpeechRecognition() {
-				try {
-					SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+            function initSpeechRecognition() {
+                try {
+                    const button = $('#speechRecongizerButton');
+                    const controller = createContinuousSpeechRecognition({
+                        SpeechRecognition: window.SpeechRecognition || window.webkitSpeechRecognition,
+                        getLanguage: () => $('#speechRecognitionLocales option:selected').val() || navigator.language,
+                        onTranscript: text => send(text),
+                        onStateChange: enabled => {
+                            button.find('.speech-label').text(enabled ? <%- jsonForScript(__('停止')) %> : <%- jsonForScript(__('音声入力')) %>);
+                            button.attr('aria-pressed', String(enabled));
+                            button.toggleClass('is-listening', enabled);
+                            $('#speechStatus').prop('hidden', !enabled);
+                        },
+                        onError: error => console.error('Speech recognition failed:', error.error || error.name),
+                    });
+                    button.on('click', controller.toggle);
+                    window.addEventListener('pagehide', controller.stop);
+                    $('#speechRecongizerButtonCol').prop('hidden', false);
+                } catch (error) {
+                    $('#speechRecongizerButtonCol').prop('hidden', true);
+                    $('#speechRecognitionLocales').prop('disabled', true);
+                }
+            }
 
-					const recognition = new SpeechRecognition();
-
-					recognition.onresult = (event) => {
-						send(event.results[event.results.length - 1][0].transcript) ;
-					}
-
-					recognition.onstart = function() {
-						isSpeechRecognizing = true ;
-
-						$('#speechRecongizerButton').text('<%- __("認識中...") %>') ;
-						$('#speechRecongizerButton').css('background-color', 'white');
-						$('#speechRecongizerButton').css('border-color', 'gray');
-						$('#speechRecongizerButton').css('color', 'black');
-					}
-
-					recognition.onend = function() {
-						isSpeechRecognizing = false ;
-
-						$('#speechRecongizerButton').text('<%- __("音声入力") %>') ;
-						$('#speechRecongizerButton').css('background-color', 'orangered');
-						$('#speechRecongizerButton').css('border-color', 'orangered');
-						$('#speechRecongizerButton').css('color', 'white');
-					}
-
-					recognition.onspeechstart = function() {
-
-					}
-
-					recognition.onspeechend = function() {
-						recognition.stop();
-					}
-
-					$('#speechRecongizerButton').on('click', () => {
-						if (!isSpeechRecognizing) {
-							recognition.lang = $('#speechRecognitionLocales option:selected').val() ;
-							recognition.start();
-						} else {
-							recognition.abort() ;
-						}
-					}) ;
-
-					$('#speechRecongizerButtonCol').prop('hidden', false) ;
-				} catch (e) {
-					$('#speechRecongizerButtonCol').prop('hidden', true) ;
-					$('#speechRecognitionLocales').prop("disabled", true);
-				}
-			}
 		</script>
 
-		<div id='main'>
-			<div class="top p-1" id="messages"></div>
-
-			<div class="rounded text-center p-1" id="notification" hidden><%- __("新しいメッセージがあります") %></div>
-			<div class="rounded p-1" id="members" hidden></div>
-			
-			<div class="bottom p-1" id="operation">
-				<div class="row">
-					<div class="col-auto">
-						<button class="btn btn-primary btn-sm" id="settingButton" type="button" data-toggle="collapse" data-target="#sample"><%- __("設定を開く") %></button>
-					</div>
-					<div class="col-auto p-0">
-						<script>
-							$(function(){
-								$('.js-modal-open').on('click',function(){
-									$('.js-modal').fadeIn();
-									return false;
-								});
-								$('.js-modal-close').on('click',function(){
-									$('.js-modal').fadeOut();
-									return false;
-								});	
-							});
-						</script>
-						<button class="js-modal-open btn btn-info btn-sm" type="button"><%- __("バーコード") %></button>
-						<button class="btn btn-info btn-sm" type="button" id="showMembersButton"><%- __("参加者リスト") %></button>
-						<div class="modal js-modal">
-							<div class="modal__bg js-modal-close"></div>
-							<div class="modal__content py-3">
-								<div class='row'>
-									<div class='col align-self-center text-center'>
-										<strong><%= title %></strong>
-									</div>
-								</div>
-								<div class='row'>
-									<div class='col align-self-center text-center'>
-										<img src="https://chart.apis.google.com/chart?cht=qr&chs=300x300&chl=<%= rootURL %>/chat?chatId=<%= requestId %>" />
-									</div>
-								</div>
-								<div class='row'>
-									<div class='col align-self-center text-center'>
-										<button class="js-modal-close btn btn-danger"><%- __("閉じる") %></button>
-									</div>
-								</div>								
-							</div><!--modal__inner-->
-						</div><!--modal-->
-					</div>
-				</div>
-				<div id="sample" class="collapse">
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<div class="row">
-								<div class="col">
-									<div class="form-group">
-										<label class="small" for="name"><%- __("名前") %></label>
-										<input type="text" class="form-control" id="displayName" name="displayName" value="<%= name %>" maxlength="30">
-									</div>
-								</div>
-								<% if (apiKey != '') { %>
-									<div class="col">
-										<div class="form-group">
-											<label class="small" for="name"><%- __("翻訳言語") %></label>
-											<select class="form-control" id="languages" title="<%- __("翻訳して表示する言語を選択します。") %>"></select>
-										</div>
-									</div>
-									<div class="col">
-										<div class="form-group">
-											<label class="small" for="name"><%- __("入力言語") %></label>
-											<select class="form-control" id="inputLanguages" title="<%- __("自分が入力する言語を選択します。") %>"></select>
-										</div>
-									</div>
-								<% } %>
-							</div>
-							<% if (apiKey != '') { %>
-								<div class="row">
-									<div class="col">
-										<div class="form-group">
-											<label class="small" for="name"><%- __("再翻訳言語") %></label>
-											<select class="form-control" id="reverseTranslationLanguages" title="<%- __("再翻訳して翻訳結果を確認する言語を選択します。") %>"></select>
-										</div>
-									</div>
-									<div class="col">
-										<div class="form-group">
-											<label class="small" for="name"><%- __("音声入力言語（Chromeのみ）") %></label>
-											<select class="form-control" id="speechRecognitionLocales" title="<%- __("音声入力をする言語を選択します。") %>"></select>
-										</div>
-									</div>
-									<div class="col align-self-center text-center">
-										<button class="btn btn-danger btn-sm" type="button" id="resetTranslationSettingsButton"><%- __("言語設定をリセット") %></button>
-									</div>
-								</div>
-							<% } %>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col">
-						<textarea class="form-control my-1" id="message" name="message" title=""<%- __("メッセージを入力") %>" placeholder="<%- __("Enterキーで送信 Shift+Enterで改行") %>" maxlength="200" aria-describedby="hint"></textarea>
-					</div>
-					<div class="col-auto align-self-center pl-0" id="speechRecongizerButtonCol" hidden>
-						<button class="form-control btn btn-primary my-1 btn-sm" style="width: 120px" id="speechRecongizerButton"><%- __("音声入力") %></button>							
-					</div>
-				</div>
-				<button class="form-control btn btn-primary my-1" id="sendButton"><%- __("送信") %></button>	
-				<div class="row">
-					<div class="col align-self-center">
-						<% if (isAlreadySignIn) { %>
-							<div class="text-center small"><%= title %> - <a href="<%= rootURL %>" target="_blank"><%- __("APP_NAME_OPEN") %></a></div>
-						<% } else { %>
-							<div class="text-center small"><%= title %> - <a href="<%= rootURL %>/signin?chatId=<%= requestId %>"><%- __("APP_NAME_SIGN_IN") %></a></div>
-						<% } %>
-					</div>
-				</div>
-			</div>
-		</div>
-	</body>
+        <div class="chat-layout">
+            <nav class="chat-rail" aria-label="<%= __('トップページ') %>">
+                <a class="brand" href="/" title="UD Chat"><%- include('parts/brand') %></a>
+                <a class="rail-link" href="/" title="<%= __('トップページ') %>" aria-label="<%= __('トップページ') %>"><i class="far fa-comments" aria-hidden="true"></i></a>
+                <% if (isAlreadySignIn) { %><a class="rail-link" href="/profile" title="<%= __('プロフィール') %>" aria-label="<%= __('プロフィール') %>"><i class="far fa-user" aria-hidden="true"></i></a><% } %>
+                <a class="rail-link" href="/about" title="<%= __('ご利用について') %>" aria-label="<%= __('ご利用について') %>"><i class="far fa-question-circle" aria-hidden="true"></i></a>
+            </nav>
+            <main id="main" class="chat-main">
+                <header class="chat-header">
+                    <div class="chat-heading">
+                        <span class="room-symbol" aria-hidden="true"><i class="far fa-comments"></i></span>
+                        <div>
+                            <p class="eyebrow">CHAT ROOM</p>
+                            <h1 title="<%= title %>"><%= title %></h1>
+                            <div class="connection-status" id="connectionStatus" role="status"><span class="connection-dot" aria-hidden="true"></span><span id="connectionLabel"><%= __('接続待機中') %></span></div>
+                        </div>
+                    </div>
+                    <div class="chat-tools">
+                        <button class="btn btn-light icon-button" id="showMembersButton" type="button" aria-label="<%= __('参加者リスト') %>" title="<%= __('参加者リスト') %>" aria-controls="membersPanel" aria-expanded="false"><i class="far fa-user" aria-hidden="true"></i><span class="tool-label"><%= __('参加者') %></span><span id="memberCount">0</span></button>
+                        <button class="btn btn-light icon-button" type="button" data-toggle="modal" data-target="#shareModal" aria-label="<%= __('バーコード') %>" title="<%= __('バーコード') %>"><i class="fas fa-qrcode" aria-hidden="true"></i><span class="tool-label"><%= __('共有') %></span></button>
+                        <button class="btn btn-light icon-button" id="settingButton" type="button" data-toggle="modal" data-target="#settingsModal" aria-label="<%= __('設定を開く') %>" title="<%= __('設定を開く') %>"><i class="fas fa-sliders-h" aria-hidden="true"></i><span class="tool-label"><%= __('設定') %></span></button>
+                    </div>
+                </header>
+                <div id="chat-error" role="alert"></div>
+                <div class="conversation">
+                    <div id="messages" aria-label="<%= __('メッセージ') %>" tabindex="0"></div>
+                    <button class="btn btn-primary btn-sm" id="notification" type="button" hidden><i class="fas fa-arrow-down" aria-hidden="true"></i><%= __('新しいメッセージがあります') %></button>
+                    <section class="members-panel" id="membersPanel" hidden aria-label="<%= __('参加者リスト') %>"><h2><%= __('参加者リスト') %></h2><div id="members"></div></section>
+                </div>
+                <div class="composer-area" id="operation">
+                    <div class="composer">
+                        <textarea class="form-control" id="message" name="message" rows="2" aria-label="<%= __('メッセージを入力') %>" placeholder="<%= __('メッセージを入力') %>" maxlength="200" aria-describedby="hint"></textarea>
+                        <div class="composer-actions">
+                            <div id="speechRecongizerButtonCol" hidden><button class="btn icon-button" id="speechRecongizerButton" type="button" aria-pressed="false"><i class="fas fa-microphone" aria-hidden="true"></i><span class="speech-label"><%= __('音声入力') %></span></button></div>
+                            <span class="speech-status" id="speechStatus" role="status" hidden><%= __('話し終わるたびに自動送信') %></span>
+                            <span class="composer-hint" id="hint"><%= __('入力操作のヒント') %></span>
+                            <button class="btn btn-primary icon-button" id="sendButton" type="button" disabled><%= __('送信') %><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                    <div class="composer-caption"><span><i class="far fa-user" aria-hidden="true"></i> <span id="currentDisplayName"><%= name %></span></span><a href="<%= isAlreadySignIn ? '/' : '/signin?chatId=' + encodeURIComponent(requestId) %>"><%= __(isAlreadySignIn ? 'APP_NAME_OPEN' : 'APP_NAME_SIGN_IN') %> <span aria-hidden="true">↗</span></a></div>
+                </div>
+            </main>
+        </div>
+        <div class="modal fade" id="shareModal" role="dialog" tabindex="-1" aria-labelledby="shareTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                <div class="modal-header"><h2 class="modal-title" id="shareTitle"><%= __('チャットを共有') %></h2><button type="button" class="close" data-dismiss="modal" aria-label="<%= __('閉じる') %>"><span aria-hidden="true">×</span></button></div>
+                <div class="modal-body text-center"><h3><%= title %></h3><img class="qr-image" src="<%= qrCode %>" alt="<%= title %> QR code" width="300" height="300"><p class="text-muted small"><%= __('QRコードを読み取って参加できます。') %></p></div>
+                <div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal"><%= __('閉じる') %></button></div>
+            </div></div>
+        </div>
+        <div class="modal fade" id="settingsModal" role="dialog" tabindex="-1" aria-labelledby="settingsTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+                <div class="modal-header"><h2 class="modal-title" id="settingsTitle"><%= __('チャット設定') %></h2><button type="button" class="close" data-dismiss="modal" aria-label="<%= __('閉じる') %>"><span aria-hidden="true">×</span></button></div>
+                <div class="modal-body"><div class="settings-grid">
+                    <div class="form-group"><label for="displayName"><%= __('名前') %></label><input class="form-control" id="displayName" name="displayName" value="<%= name %>" maxlength="30"></div>
+                    <% if (apiKey != '') { %>
+                        <div class="form-group"><label for="languages"><%= __('翻訳言語') %></label><select class="form-control" id="languages" title="<%= __('翻訳して表示する言語を選択します。') %>"></select></div>
+                        <div class="form-group"><label for="inputLanguages"><%= __('入力言語') %></label><select class="form-control" id="inputLanguages" title="<%= __('自分が入力する言語を選択します。') %>"></select></div>
+                        <div class="form-group"><label for="reverseTranslationLanguages"><%= __('再翻訳言語') %></label><select class="form-control" id="reverseTranslationLanguages" title="<%= __('再翻訳して翻訳結果を確認する言語を選択します。') %>"></select></div>
+                    <% } %>
+                    <div class="form-group"><label for="speechRecognitionLocales"><%= __('音声入力言語') %></label><select class="form-control" id="speechRecognitionLocales" title="<%= __('音声入力をする言語を選択します。') %>"></select></div>
+                </div><button class="btn btn-light btn-sm" type="button" id="resetTranslationSettingsButton"><i class="fas fa-undo" aria-hidden="true"></i><%= __('言語設定をリセット') %></button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-primary" data-dismiss="modal"><%= __('閉じる') %></button></div>
+            </div></div>
+        </div>
+    </body>
 </html>

@@ -1,0 +1,38 @@
+<% if (config.apiKey) { %>
+<script src="https://www.gstatic.com/firebasejs/13.0.0/firebase-app-compat.js" integrity="sha384-TlPrn6ucRHEvycwgV0QgSFXJhJyUwaN4N9iqLak1MWy0/G1VhVwgttErzSlUDfa2" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/13.0.0/firebase-auth-compat.js" integrity="sha384-VRJm5/qS935RWeVBR4A4ZoWzrWZpqPmTgnvM/z2R4A1+mlGxWYVjjlE5ZWXZE2un" crossorigin="anonymous"></script>
+<div class="container my-3" id="social-signin">
+    <button type="button" class="btn btn-light" data-provider="facebook" aria-label="Facebook — <%= __('サインイン') %>">Facebook</button>
+    <button type="button" class="btn btn-light" data-provider="twitter" aria-label="X / Twitter — <%= __('サインイン') %>">X / Twitter</button>
+    <p role="alert" id="social-error"></p>
+</div>
+<script>
+    firebase.initializeApp(<%- jsonForScript(config) %>);
+    document.querySelectorAll('#social-signin button').forEach(button => {
+        button.addEventListener('click', async () => {
+            const buttons = document.querySelectorAll('#social-signin button');
+            buttons.forEach(item => item.disabled = true);
+            document.getElementById('social-error').textContent = '';
+            try {
+                await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+                const provider = button.dataset.provider === 'facebook'
+                    ? new firebase.auth.FacebookAuthProvider() : new firebase.auth.TwitterAuthProvider();
+                const credential = await firebase.auth().signInWithPopup(provider);
+                const response = await fetch('/auth_done/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ idToken: await credential.user.getIdToken() }),
+                });
+                if (!response.ok) throw new Error('Sign-in failed. Please try again.');
+                await firebase.auth().signOut();
+                const chatId = <%- jsonForScript(chatId) %>;
+                location.href = chatId ? '/chat?chatId=' + encodeURIComponent(chatId) : '/';
+            } catch (error) {
+                await firebase.auth().signOut().catch(() => {});
+                document.getElementById('social-error').textContent = error.message;
+                buttons.forEach(item => item.disabled = false);
+            }
+        });
+    });
+</script>
+<% } %>

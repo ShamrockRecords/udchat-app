@@ -17,7 +17,11 @@ router.get('/', async function(req, res, next) {
 }) ;
 
 router.post('/', async function(req, res, next) {
-    firebaseSession.resetPassword(req.body.email) ;
+    try {
+        await firebaseSession.resetPassword(req.body.email);
+    } catch {
+        return res.status(400).render('resetPassword', { lang: res.locale, errorMessage: 'Please check your email address and try again.' });
+    }
 
     res.redirect('/') ;
 }) ;

@@ -1,3 +1,1 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!doctype html><html lang="<%= typeof lang !== 'undefined' ? lang : 'en' %>"><head><title>UD Chat — <%= message %></title><%- include('parts/head') %></head><body><%- include('parts/nav_bar_before_signin') %><main class="form-page"><div class="form-card"><p class="eyebrow">UD CHAT · <%= error.status || 'ERROR' %></p><h1><%= message %></h1><a class="btn btn-primary" href="/"><%= __('トップページ') %></a><% if (error.stack) { %><details class="mt-4"><summary>Details</summary><pre class="small mt-3" style="white-space:pre-wrap;overflow-wrap:anywhere"><%= error.stack %></pre></details><% } %></div></main><%- include('parts/footer') %></body></html>

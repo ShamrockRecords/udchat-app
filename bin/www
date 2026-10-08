@@ -31,7 +31,26 @@ server.on('listening', onListening);
 
 var socketWrapper = require('../models/socket.js') ;
 
-socketWrapper.init(server) ;
+socketWrapper.init(server);
+
+let shuttingDown = false;
+function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  const deadline = setTimeout(() => process.exit(1), 25000);
+  deadline.unref();
+  socketWrapper.close(async () => {
+    try {
+      await require('firebase-admin').firestore().terminate();
+      clearTimeout(deadline);
+      process.exit(0);
+    } catch {
+      process.exit(1);
+    }
+  });
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 /**
  * Normalize a port into a number, string, or false.

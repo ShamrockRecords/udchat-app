@@ -2,8 +2,8 @@ var express = require('express');
 let admin = require('firebase-admin');
 let firebaseSession = require('../models/firebase_session.js') ;
 var router = express.Router() ;
-const i18n = require('i18n') ;
-const { response } = require('express');
+const createError = require('http-errors');
+const { documentId } = require('../models/security');
 
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 
@@ -15,7 +15,7 @@ router.get('/', wrap(async function(req, res, next) {
         return ;
     }
 
-    let currentUser = req.session.user ;
+    let currentUser = req.user ;
 
     let snapshot = await admin.firestore().collection("chats").where("ownerUid", "==", currentUser.uid).orderBy('name').get() ;
 
@@ -42,10 +42,10 @@ router.get('/', wrap(async function(req, res, next) {
     if (userProfile.agreement == '1') {
         res.render('index', {
             lang: res.locale,
-            name: userProfile.name,
-            rootURL: process.env.ROOT_URL,
+            name: userProfile.name || '',
+            rootURL: require('../models/config').rootURL,
             chats: chats,
-            errorMessage: userProfile.name == '' ? res.__("プロフィールに名前を入力してください。") : "",
+            errorMessage: !userProfile.name ? res.__("プロフィールに名前を入力してください。") : "",
         });
     } else {
         res.render('agreement', {
@@ -62,19 +62,14 @@ router.post('/agreement', wrap(async function(req, res, next) {
         return ;
     }
 
-    let currentUser = req.session.user ;
+    let currentUser = req.user ;
 
-    let doc = await admin.firestore().collection("users").doc(currentUser.uid).get() ;
-    let userProfile = doc.data() ;
-
-    userProfile.agreement = '1' ;
-
-    await admin.firestore().collection("users").doc(currentUser.uid).set(userProfile) ;
+    await admin.firestore().collection('users').doc(currentUser.uid).set({ agreement: '1' }, { merge: true });
 
     res.redirect('/');
 })) ;
 
-router.get('/delete', wrap(async function(req, res, next) {
+router.post('/delete', wrap(async function(req, res, next) {
     let result = await firebaseSession.enter(req, res) ;
 
     if (!result) {
@@ -82,15 +77,19 @@ router.get('/delete', wrap(async function(req, res, next) {
         return ;
     }
 
-    let chatId = req.query.chatId ;
-
-    await admin.firestore().collection("chats").doc(chatId).delete() ;
-    //await admin.firestore().collection("chat").doc(chatId).delete() ;
+    const chatId = documentId(req.body.chatId);
+    const ref = admin.firestore().collection('chats').doc(chatId);
+    await admin.firestore().runTransaction(async transaction => {
+        const room = (await transaction.get(ref)).data();
+        if (!room) throw createError(404);
+        if (room.ownerUid !== req.user.uid) throw createError(403);
+        transaction.delete(ref);
+    });
 
     res.redirect('/') ;
 })) ;
 
-router.get('/signout', wrap(async function(req, res, next) {
+router.post('/signout', wrap(async function(req, res, next) {
 	delete req.session.errorMessage;
 
 	await firebaseSession.signOut(req, res, () => {
@@ -106,27 +105,29 @@ router.get('/download', wrap(async function(req, res, next) {
         return ;
     }
 
-    let currentUser = req.session.user ;
-    let chatId = req.query.chatId ;
+    let currentUser = req.user ;
+    let chatId = documentId(req.query.chatId);
     let data = {} ;
 
     if (chatId != undefined) {
         let doc = await admin.firestore().collection("chats").doc(chatId).get() ;
         data = doc.data() ;
 
-        if (data.ownerUid != currentUser.uid) {
+        if (!data || data.ownerUid != currentUser.uid) {
             res.redirect('/');
             return ;
         }
     }
     
-    let reqestedTimezoneOffset = req.query.to ;
+    let reqestedTimezoneOffset = Number(req.query.to || 0);
+    if (!Number.isFinite(reqestedTimezoneOffset) || Math.abs(reqestedTimezoneOffset) > 840) throw createError(400);
     let targetDate = new Date() ;
 
     targetDate.setDate(targetDate.getDate() - 3) ;
 
     let snapshot = await admin.firestore().collection("chat").doc(chatId).collection("messages").where("timestamp", ">", targetDate).orderBy('timestamp').get() ;
  
+    res.type('text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', "attachment; filename*=UTF-8''" + encodeURIComponent(data.name) + '.csv');
     
     let line = '#timestamp,name,message\r\n' ;
@@ -145,12 +146,18 @@ router.get('/download', wrap(async function(req, res, next) {
 
         date.setHours(date.getHours() + (date.getTimezoneOffset() - reqestedTimezoneOffset)/60) ;
 
-        let line = '"' + date.toLocaleString('ja-JP') + '"' + ',' + command.name + ',' + command.message + "\r\n" ;
+        let line = [date.toLocaleString('ja-JP'), command.name, command.message].map(csvCell).join(',') + '\r\n';
 
         res.write(line) ;
     }
     
     res.end() ;
 })) ;
+
+function csvCell(value) {
+    let text = String(value ?? '');
+    if (/^[=+@\-\t\r\n]/.test(text)) text = "'" + text;
+    return '"' + text.replace(/"/g, '""') + '"';
+}
 
 module.exports = router;

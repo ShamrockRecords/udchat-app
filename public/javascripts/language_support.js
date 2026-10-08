@@ -1,61 +1,34 @@
-async function detect(apiKey, message, completion) {	
-    if (apiKey == '') {
-        completion("", "") ;
-        return ;
-    }
-
-    let URL = "https://translation.googleapis.com/language/translate/v2/detect?key=" + apiKey ;
-    
-    URL += "&q=" + encodeURIComponent(message) ;
-
-    let data = await fetch(URL).then(response => response.json()) ;
-
+async function translationRequest(url, options = {}) {
     try {
-        completion(data.data.detections[0][0].language) ;
-    } catch (e) {
-        completion("", "") ;
+        const response = await fetch(url, { ...options, signal: AbortSignal.timeout(10000) });
+        if (!response.ok) return null;
+        return await response.json();
+    } catch {
+        return null;
     }
+}
+
+async function detect(apiKey, message, completion) {
+    if (!apiKey) return completion('', '');
+    const query = new URLSearchParams({ key: apiKey, q: message });
+    const data = await translationRequest('https://translation.googleapis.com/language/translate/v2/detect?' + query);
+    completion(data?.data?.detections?.[0]?.[0]?.language || '');
 }
 
 async function translate(apiKey, message, from, to, completion) {
-    if (apiKey == '') {
-        completion("", "") ;
-        return ;
-    }
-
-    if (to != "" && from != to) {
-        let URL = "https://translation.googleapis.com/language/translate/v2?key=" + apiKey ;
-        
-        if (from != '') {
-            URL += "&source=" + from ;
-        }
-        
-        URL += "&target=" + to + "&q=" + encodeURIComponent(message) ;
-    
-        let data = await fetch(URL).then(response => response.json()) ;
-        
-        try {
-            completion(data.data.translations[0].translatedText, data.data.translations[0].detectedSourceLanguage) ;
-        } catch (e) {
-            completion("", "") ;
-        }
-    } else {
-        return "" ;
-    }
+    if (!apiKey || !to || from === to) return completion('', '');
+    const query = new URLSearchParams({ key: apiKey, target: to, q: message });
+    if (from) query.set('source', from);
+    const data = await translationRequest('https://translation.googleapis.com/language/translate/v2?' + query);
+    const translation = data?.data?.translations?.[0];
+    completion(translation?.translatedText || '', translation?.detectedSourceLanguage);
 }
 
 async function supportedLanguages(apiKey) {
-    if (apiKey == '') {
-        return ;
-    }
-
-    let URL = "https://translation.googleapis.com/language/translate/v2/languages?key=" + apiKey ;
-
-    let body = {"target": getDefaultLanguage()} ;
-
-    let data = await fetch(URL, {method: "POST", body: JSON.stringify(body)}).then(response => response.json()) ;
-       
-    return data.data.languages ;
+    if (!apiKey) return [];
+    const query = new URLSearchParams({ key: apiKey, target: getDefaultLanguage() });
+    const data = await translationRequest('https://translation.googleapis.com/language/translate/v2/languages?' + query);
+    return data?.data?.languages || [];
 }
 
 function getDefaultLanguage() {

@@ -4,16 +4,17 @@
 		<%- include('parts/head', {title: ""}) %>
 	</head>
 	<body>
-		<nav class="navbar navbar-expand-lg navbar-light text-dark bg-dark">
-			<a class="navbar-brand text-white" href="/"><%- __("UD Chat") %></a>
+		<nav class="navbar navbar-expand-md navbar-light app-nav">
+			<a class="brand" href="/"><%- include('parts/brand') %></a>
 		</nav>
 		
-		<%- include('parts/lang', {}) %>
+		<div class="container"><%- include('parts/lang') %></div>
 
 		<%- include('aboutBody', {}) %>
 
 		<div class="container p-3 text-center">
 			<form method="POST" action="/agreement">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 				
 				<div class="form-group">
 					<button type="submit" class="btn btn-primary"><%- __("UD Chatを使う") %></button>

@@ -13,15 +13,7 @@ router.get('/', async function(req, res, next) {
 
 	let chatId = req.query.chatId ;
 
-	var config = {
-		apiKey: process.env.OPENED_FIREBASE_API_KEY,
-		authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-		projectId: process.env.FIREBASE_PROJECT_ID,
-		storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-		messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-		appId: process.env.FIREBASE_APP_ID,
-		measurementId: process.env.MEASUREMENT_ID
-	};
+	var config = require('../models/config').firebaseConfig;
 
 	res.render('signin', {
 		lang: res.locale,
@@ -32,28 +24,20 @@ router.get('/', async function(req, res, next) {
 	});
 });
 	
-router.post('/', function(req, res, next) {
+router.post('/', async function(req, res, next) {
 	let chatId = req.body.chatId ;
 
-	firebaseSession.signIn(req, res, (result, email, errorMessage) => {
+	return firebaseSession.signIn(req, res, (result, email, errorMessage) => {
 		if (result) {
 			if (chatId != undefined && chatId != '') {
-				res.redirect('/chat?chatId=' + chatId) ;
+				res.redirect('/chat?chatId=' + encodeURIComponent(chatId)) ;
 			} else {
 				res.redirect('/') ;
 			}
 		} else {
-			var config = {
-				apiKey: process.env.OPENED_FIREBASE_API_KEY,
-				authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-				projectId: process.env.FIREBASE_PROJECT_ID,
-				storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-				messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-				appId: process.env.FIREBASE_APP_ID,
-				measurementId: process.env.MEASUREMENT_ID
-			};
+			var config = require('../models/config').firebaseConfig;
 
-			res.render('signin', {
+			res.status(401).render('signin', {
 				lang: res.locale,
 				email: email,
 				chatId: chatId != undefined ? chatId : '',

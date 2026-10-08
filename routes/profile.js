@@ -13,7 +13,7 @@ router.get('/', wrap(async function(req, res, next) {
         return ;
     }
 
-    let currentUser = req.session.user ;
+    let currentUser = req.user ;
 
     let doc = await admin.firestore().collection("users").doc(currentUser.uid).get() ;
 
@@ -26,7 +26,7 @@ router.get('/', wrap(async function(req, res, next) {
         data = doc.data() ;
     }
 
-    errorMessage = req.session.errorMessage ;
+    let errorMessage = req.session.errorMessage ;
 
     delete req.session.errorMessage ;
     
@@ -39,12 +39,9 @@ router.get('/', wrap(async function(req, res, next) {
 })) ;
 
 router.post('/update', wrap(async function(req, res, next) {
-    let user = req.session.user ;
-    let data = {} ;
-
-    for (let key in req.body) {
-        data[key] = req.body[key] ;
-    }
+    if (!await firebaseSession.enter(req, res)) return res.redirect('/signin');
+    let user = req.user;
+    let data = { name: require('../models/security').textField(req.body.name, 100, true) };
 
     try {
         await admin.firestore().collection("users").doc(user.uid).update(data) ;
@@ -55,8 +52,6 @@ router.post('/update', wrap(async function(req, res, next) {
     res.redirect('/') ;
 })) ;
 
-router.post('/picture', wrap(async function(req, res, next) {
 
-})) ;
 
 module.exports = router;

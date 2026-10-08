@@ -1,32 +1,16 @@
-var express = require('express');
-let firebaseSession = require('../models/firebase_session.js') ;
-var router = express.Router() ;
-
-router.get('/', async function(req, res, next) {
-    var config = {
-        apiKey: process.env.OPENED_FIREBASE_API_KEY,
-        authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-        appId: process.env.FIREBASE_APP_ID,
-        measurementId: process.env.MEASUREMENT_ID
-    };
-
-    res.render('authDone', {
-        lang: res.locale,
-        config: config
-    });		 
-}) ;
-
-router.get('/verify', async function(req, res, next) {
-    if (req.query.uid != undefined && req.query.uid != '') {
-		await firebaseSession.signInFromUI(req.query.uid, res) ;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({result: true}));
-	} else {
-        res.redirect("/") ;
+const router = require('express').Router();
+const firebaseSession = require('../models/firebase_session');
+const { firebaseConfig } = require('../models/config');
+router.get('/', (req, res) => res.render('authDone', { lang: res.locale, config: firebaseConfig }));
+router.post('/verify', async (req, res) => {
+    if (typeof req.body.idToken !== 'string' || !req.body.idToken || req.body.idToken.length > 10000) {
+        return res.status(400).json({ result: false });
     }
-}) ;
-
+    try {
+        await firebaseSession.signInFromUI(req.body.idToken, req, res);
+        res.json({ result: true });
+    } catch {
+        res.status(401).json({ result: false });
+    }
+});
 module.exports = router;

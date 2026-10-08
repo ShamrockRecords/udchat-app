@@ -1,124 +1,49 @@
-var express = require('express');
-let admin = require('firebase-admin');
-let firebaseSession = require('../models/firebase_session.js') ;
-var router = express.Router() ;
-const uuid = require('node-uuid');
+const express = require('express');
+const admin = require('firebase-admin');
+const firebaseSession = require('../models/firebase_session');
+const { randomUUID } = require('node:crypto');
+const { documentId, textField, equalSecret } = require('../models/security');
+const { issueToken } = require('../models/chat_access');
+const { rootURL } = require('../models/config');
+const router = express.Router();
+const QRCode = require('qrcode');
 
-const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
-
-router.get('/', wrap(async function(req, res, next) {
-    let chatId = req.query.chatId ;   
-    let currentUser = req.session.user ;
-    let uid = currentUser != undefined ? currentUser.uid : null ;
-    let data = null ;
-
-    {
-        let doc = await admin.firestore().collection("chats").doc(chatId).get() ;
-        data = doc.data() ;
+async function showChat(req, res) {
+    const chatId = documentId(req.method === 'POST' ? req.body.chatId : req.query.chatId);
+    const data = (await admin.firestore().collection('chats').doc(chatId).get()).data();
+    if (!data) return res.redirect('/');
+    await firebaseSession.enter(req, res);
+    const currentUser = req.user;
+    const uid = currentUser?.uid || randomUUID();
+    let name = null;
+    if (currentUser) {
+        const profile = (await admin.firestore().collection('users').doc(uid).get()).data();
+        name = profile?.name || null;
     }
-
-    if (data == null) {
-        res.redirect('/');
-        return ;
+    const owner = data.ownerUid === uid;
+    if (owner && data.displayName) name = data.displayName;
+    if (req.method === 'POST') name = textField(req.body.displayName, 100, true);
+    const needsPasscode = Boolean(data.passcode) && !owner;
+    const passcodeAccepted = req.method === 'POST' && equalSecret(req.body.passcode || '', data.passcode || '');
+    if (!name || (needsPasscode && !passcodeAccepted)) {
+        if (req.method === 'POST') res.status(401);
+        return res.render('passcode', {
+            lang: res.locale, title: data.name, displayName: name || '',
+            isAlreadySignIn: Boolean(currentUser), isNeedPasscode: needsPasscode, chatId,
+        });
     }
-
-    let name = null ;
-    let isAlreadySignIn = false ;
-
-    if (currentUser != undefined) {
-        let doc = await admin.firestore().collection("users").doc(currentUser.uid).get() ;
-        let userProfile = doc.data() ;
-
-        if (userProfile != null) {
-            name = userProfile.name ;
-            isAlreadySignIn = true ;
-        }
-    }
-
-    // If chat has unique displayed name, it's used.
-    if (data.ownerUid == uid && (data.displayName != undefined && data.displayName != '')) {
-        name = data.displayName ;
-    }
-
-    if (req.session.displayName != undefined) {
-        name = req.session.displayName ;
-        delete req.session.displayName ;
-    }
-
-    if ((data.passcode != '' && data.ownerUid != uid) || name == null) {
-        if (req.session.passcode != data.passcode) {
-            res.render('passcode', {
-                lang: res.locale,
-                title: data.name,
-                displayName: name != null ? name : '',
-                isAlreadySignIn: isAlreadySignIn,
-                isNeedPasscode: (data.passcode != ''),
-                chatId: chatId,
-            });		 
-
-            return ;
-        }
-    }
-
-    delete req.session.passcode ;
-
-    if (uid == null) {
-        uid = uuid.v4() ;
-    }
-
     res.render('chat', {
-        lang: res.locale,
-        title: data.name,
-        name: name,
-        requestId: chatId,
-        uid: uid,
-        rootURL: process.env.ROOT_URL,
-        isAlreadySignIn: isAlreadySignIn,
-        apiKey: process.env.GOOGLE_CLOUD_TRANSLATION_API_KEY,
-    });		 
-})) ;
-
-router.post('/passcode', wrap(async function(req, res, next) {
-    let chatId = req.body.chatId ;
-
-    /*
-    let result = await firebaseSession.enter(req, res) ;
-    
-    if (!result) {
-        if (chatId != undefined) {
-            res.redirect('/signin?chatId=' + chatId);
-        } else {
-            res.redirect('/signin');
-        }
-        return ;
-    }
-    */
-
-    let passcode = req.body.passcode ;
-    let displayName = req.body.displayName ;
-
-    req.session.passcode = passcode ;
-    req.session.displayName = displayName ;
-
-    res.redirect("/chat?chatId=" + chatId) ;
-})) ;
-
-router.get('/verify', wrap(async function(req, res, next) {
-    let chatId = req.query.chatId ; 
-    
-    {
-        let doc = await admin.firestore().collection("chats").doc(chatId).get() ;
-        data = doc.data() ;
-    }
-
-    let result = false ;
-
-    if (data != null) {
-        result = true ;
-    }
-
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({result: result}));
-})) ;
-
+        lang: res.locale, title: data.name, name, requestId: chatId, uid, rootURL,
+        isAlreadySignIn: Boolean(currentUser), apiKey: process.env.GOOGLE_CLOUD_TRANSLATION_API_KEY || '',
+        chatToken: issueToken({ ...data, chatId }, uid),
+        qrCode: await QRCode.toDataURL(rootURL + '/chat?chatId=' + encodeURIComponent(chatId), { width: 300, margin: 2 }),
+    });
+}
+router.get('/', showChat);
+router.post('/passcode', showChat);
+router.get('/verify', async (req, res) => {
+    const chatId = documentId(req.query.chatId);
+    const doc = await admin.firestore().collection('chats').doc(chatId).get();
+    res.json({ result: doc.exists });
+});
 module.exports = router;
