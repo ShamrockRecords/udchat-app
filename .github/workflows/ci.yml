@@ -15,7 +15,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --no-audit
       - run: npm run check
       - run: npm test
-      - run: npm audit --audit-level=low
+      - run: npm audit --audit-level=low --fetch-timeout=45000 --fetch-retries=1
