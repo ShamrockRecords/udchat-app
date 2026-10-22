@@ -7,7 +7,7 @@ function signature(value) {
 }
 function roomVersion(room) {
   // Do not disclose even a hash of a short passcode without a server-held key.
-  return signature(JSON.stringify([room.ownerUid, room.passcode || '']));
+  return signature(JSON.stringify([room.ownerUid, room.passcode || '', room.accessRevision || '']));
 }
 function issueToken(room, uid) {
   const payload = Buffer.from(JSON.stringify({

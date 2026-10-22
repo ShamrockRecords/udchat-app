@@ -275,7 +275,7 @@
                     document.addEventListener('click', () => Notification.requestPermission().catch(() => {}), { once: true });
                 }
 
-				$('#messages').scroll(() => {
+				$('#messages').on('scroll', () => {
 					let clientHeight = $('#messages').get(0).clientHeight ;
 					let scrollHeight = $('#messages').get(0).scrollHeight ;
 
@@ -467,7 +467,7 @@
 					$('#' +tag).append(option) ;
 				}
 
-				$('#' +tag).change(() => {
+				$('#' +tag).on('change', () => {
 					localStorage.setItem(tag, $('#' +tag + ' option:selected').val());
 				}) ;
 			}
@@ -517,8 +517,8 @@
                     </div>
                     <div class="chat-tools">
                         <button class="btn btn-light icon-button" id="showMembersButton" type="button" aria-label="<%= __('参加者リスト') %>" title="<%= __('参加者リスト') %>" aria-controls="membersPanel" aria-expanded="false"><i class="far fa-user" aria-hidden="true"></i><span class="tool-label"><%= __('参加者') %></span><span id="memberCount">0</span></button>
-                        <button class="btn btn-light icon-button" type="button" data-toggle="modal" data-target="#shareModal" aria-label="<%= __('バーコード') %>" title="<%= __('バーコード') %>"><i class="fas fa-qrcode" aria-hidden="true"></i><span class="tool-label"><%= __('共有') %></span></button>
-                        <button class="btn btn-light icon-button" id="settingButton" type="button" data-toggle="modal" data-target="#settingsModal" aria-label="<%= __('設定を開く') %>" title="<%= __('設定を開く') %>"><i class="fas fa-sliders-h" aria-hidden="true"></i><span class="tool-label"><%= __('設定') %></span></button>
+                        <button class="btn btn-light icon-button" type="button" data-bs-toggle="modal" data-bs-target="#shareModal" aria-label="<%= __('バーコード') %>" title="<%= __('バーコード') %>"><i class="fas fa-qrcode" aria-hidden="true"></i><span class="tool-label"><%= __('共有') %></span></button>
+                        <button class="btn btn-light icon-button" id="settingButton" type="button" data-bs-toggle="modal" data-bs-target="#settingsModal" aria-label="<%= __('設定を開く') %>" title="<%= __('設定を開く') %>"><i class="fas fa-sliders-h" aria-hidden="true"></i><span class="tool-label"><%= __('設定') %></span></button>
                     </div>
                 </header>
                 <div id="chat-error" role="alert"></div>
@@ -543,14 +543,14 @@
         </div>
         <div class="modal fade" id="shareModal" role="dialog" tabindex="-1" aria-labelledby="shareTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-                <div class="modal-header"><h2 class="modal-title" id="shareTitle"><%= __('チャットを共有') %></h2><button type="button" class="close" data-dismiss="modal" aria-label="<%= __('閉じる') %>"><span aria-hidden="true">×</span></button></div>
+                <div class="modal-header"><h2 class="modal-title" id="shareTitle"><%= __('チャットを共有') %></h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<%= __('閉じる') %>"></button></div>
                 <div class="modal-body text-center"><h3><%= title %></h3><img class="qr-image" src="<%= qrCode %>" alt="<%= title %> QR code" width="300" height="300"><p class="text-muted small"><%= __('QRコードを読み取って参加できます。') %></p></div>
-                <div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal"><%= __('閉じる') %></button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal"><%= __('閉じる') %></button></div>
             </div></div>
         </div>
         <div class="modal fade" id="settingsModal" role="dialog" tabindex="-1" aria-labelledby="settingsTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
-                <div class="modal-header"><h2 class="modal-title" id="settingsTitle"><%= __('チャット設定') %></h2><button type="button" class="close" data-dismiss="modal" aria-label="<%= __('閉じる') %>"><span aria-hidden="true">×</span></button></div>
+                <div class="modal-header"><h2 class="modal-title" id="settingsTitle"><%= __('チャット設定') %></h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<%= __('閉じる') %>"></button></div>
                 <div class="modal-body"><div class="settings-grid">
                     <div class="form-group"><label for="displayName"><%= __('名前') %></label><input class="form-control" id="displayName" name="displayName" value="<%= name %>" maxlength="30"></div>
                     <% if (apiKey != '') { %>
@@ -560,7 +560,7 @@
                     <% } %>
                     <div class="form-group"><label for="speechRecognitionLocales"><%= __('音声入力言語') %></label><select class="form-control" id="speechRecognitionLocales" title="<%= __('音声入力をする言語を選択します。') %>"></select></div>
                 </div><button class="btn btn-light btn-sm" type="button" id="resetTranslationSettingsButton"><i class="fas fa-undo" aria-hidden="true"></i><%= __('言語設定をリセット') %></button></div>
-                <div class="modal-footer"><button type="button" class="btn btn-primary" data-dismiss="modal"><%= __('閉じる') %></button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal"><%= __('閉じる') %></button></div>
             </div></div>
         </div>
     </body>

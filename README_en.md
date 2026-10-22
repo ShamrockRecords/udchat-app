@@ -6,7 +6,7 @@ UDChat uses Express, EJS, Socket.IO, Firebase Authentication and Firestore. Ther
 
 ## Local setup
 
-Use **Node.js 24.x** and **npm 11.x** (`nvm use` reads `.nvmrc`).
+Use **Node.js 24.22.1 or a later 24.x release** and **npm 11.x** (`nvm install` / `nvm use` reads `.nvmrc`). `engine-strict` rejects dependency installation on unsupported runtimes. This minimum addresses the [October 2026 Node.js security release](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases).
 
 ```sh
 npm ci
@@ -47,7 +47,9 @@ Run **one web dyno with one Node.js process**. Socket.IO presence/broadcasts and
 
 Firebase identity is verified from a 14-day HttpOnly/Secure/SameSite=Lax session cookie. Locale and CSRF tokens use a small signed cookie; no password or identity is stored there. Cookie contents are not encrypted. A stable `SESSION_SECRET` preserves those settings across restarts.
 
-Chat connection grants expire after 14 hours. Reopen the chat when a grant expires. Passcode changes and room deletion take effect on the next connection. Reload browser tabs opened before the deployment.
+Chat connection grants expire after 14 hours, including idle receivers. Passcode changes and deletion through the app immediately disconnect existing participants. Restoring a previous passcode does not revive old grants; name-only edits keep connections. An optional `accessRevision` field is saved on room edits; no data migration is required. Reopen the chat when access expires and reload tabs opened before deployment. Browser connections must have the same Origin as `ROOT_URL`; non-browser connections still require a signed grant. Signup/reset emails share an IP limit of 30 requests per 15 minutes, counting successes too.
+
+Rebuild and deploy to update Node.js; restarting a dyno alone does not update the runtime. Check the build log and `heroku run --no-tty --app <app-name> 'node --version'` for 24.22.1 or a later 24.x release.
 
 `/healthz` checks process liveness, not Firebase connectivity. `SIGTERM` stops new chat work, waits for active operations, and closes connections with a 25-second deadline.
 
@@ -57,8 +59,10 @@ The existing Firestore schema is preserved. Deleting a room still deletes only i
 
 ## Dependency maintenance
 
-The October 2026 update uses Express 5, Firebase Admin 13 and Socket.IO 4. EJS stays on patched 3.x and Bootstrap on 4.6.2 for compatibility with the existing templates and UI. Unused/legacy Firebase client, FirebaseUI, jQuery UI, node-fetch, node-uuid and js-base64 dependencies were removed. Scoped `uuid` overrides select patched CommonJS-compatible 11.x for Google SDK dependencies that only call v4; revisit these when upstream dependencies are updated.
+The 2026-10-22 update uses Express 5.3.0, EJS 7.0.2, dotenv 18.0.8 and Firebase Admin 14.5.0, with updated transitive dependencies. Server code uses the modular Firebase app/auth/firestore entry points. Obsolete UUID overrides were removed. Browser assets use Bootstrap 5.3.8, jQuery 4.0.0 and Firebase JS 13.1.0 with pinned versions and SRI hashes. Existing templates, styling and continuous speech input are preserved.
 
-GitHub Actions runs syntax checks, regression tests and a production dependency audit on Node.js 24.
+GitHub Actions uses `.nvmrc`, runs syntax/regression checks and audits all dependencies, failing on known low-or-higher vulnerabilities. An audit with zero findings does not guarantee application or cloud configuration security.
+
+The production Firestore rules read on 2026-10-22 deny all client reads/writes. Admin SDK access uses IAM and still requires server-side authorization. Direct Firebase Console edits bypass the app's immediate socket revocation; restart the app to disconnect existing participants after such edits.
 
 References: [Heroku Node.js support](https://devcenter.heroku.com/articles/nodejs-support), [dyno shutdown](https://devcenter.heroku.com/articles/dyno-shutdown-behavior), [Firebase session cookies](https://firebase.google.com/docs/auth/admin/manage-cookies), [Authentication REST API](https://firebase.google.com/docs/reference/rest/auth).

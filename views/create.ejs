@@ -39,7 +39,7 @@
 				</div>
 				<script>
 					$(function() {
-						$('form[action="/create"]').submit(function() {
+						$('form[action="/create"]').on('submit', function() {
 							$(this).find(':submit').attr('disabled', 'disabled') ;
 					  	});
 					});

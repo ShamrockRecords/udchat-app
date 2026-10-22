@@ -6,12 +6,12 @@ const cookieSession = require('cookie-session');
 const logger = require('morgan');
 const { rateLimit } = require('express-rate-limit');
 const i18n = require('i18n');
-const admin = require('firebase-admin');
+const { getApps, initializeApp, cert } = require('firebase-admin/app');
 const { csrfProtection, jsonForScript } = require('./models/security');
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
+if (!getApps().length) {
+  initializeApp({
+    credential: cert({
       projectId: process.env.FIREBASE_ADMINSDK_project_id,
       clientEmail: process.env.FIREBASE_ADMINSDK_client_email,
       privateKey: (process.env.FIREBASE_ADMINSDK_private_key || '').replace(/\\n/g, '\n'),
@@ -61,7 +61,12 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
   skip: req => req.method !== 'POST',
 });
-app.use(['/signin', '/signup', '/reset_password', '/auth_done/verify', '/chat/passcode'], authLimiter);
+app.use(['/signin', '/auth_done/verify', '/chat/passcode'], authLimiter);
+// Successful email requests also consume quota; otherwise a sender can bypass the limit with 302 responses.
+app.use(['/signup', '/reset_password'], rateLimit({
+  windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-8', legacyHeaders: false,
+  skip: req => req.method !== 'POST',
+}));
 
 for (const [url, route] of Object.entries({
   '/signin': 'signin', '/signup': 'signup', '/reset_password': 'resetPassword',

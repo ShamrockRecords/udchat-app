@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
 const { authCookieOptions } = require('./config');
 const { randomBytes } = require('node:crypto');
 const expiresIn = 14 * 24 * 60 * 60 * 1000;
@@ -26,11 +26,11 @@ function clearIdentity(req, res) {
   res.clearCookie('sessionCookie', authCookieOptions);
 }
 async function establishSession(idToken, req, res) {
-  const claims = await admin.auth().verifyIdToken(idToken, true);
+  const claims = await getAuth().verifyIdToken(idToken, true);
   const user = verifiedUser(claims, res);
   const age = Date.now() / 1000 - claims.auth_time;
   if (!Number.isFinite(age) || age < -60 || age > 300) throw new Error('Please sign in again.');
-  const cookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
+  const cookie = await getAuth().createSessionCookie(idToken, { expiresIn });
   req.session = { locale: req.session.locale, csrfToken: randomBytes(32).toString('hex') };
   req.user = user;
   res.cookie('sessionCookie', cookie, { ...authCookieOptions, maxAge: expiresIn });
@@ -39,7 +39,7 @@ module.exports = {
   async enter(req, res) {
     if (!req.cookies.sessionCookie) { delete req.user; return false; }
     try {
-      req.user = verifiedUser(await admin.auth().verifySessionCookie(req.cookies.sessionCookie, true), res);
+      req.user = verifiedUser(await getAuth().verifySessionCookie(req.cookies.sessionCookie, true), res);
       return true;
     } catch {
       clearIdentity(req, res);

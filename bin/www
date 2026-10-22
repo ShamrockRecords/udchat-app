@@ -41,7 +41,7 @@ function shutdown() {
   deadline.unref();
   socketWrapper.close(async () => {
     try {
-      await require('firebase-admin').firestore().terminate();
+      await require('firebase-admin/firestore').getFirestore().terminate();
       clearTimeout(deadline);
       process.exit(0);
     } catch {

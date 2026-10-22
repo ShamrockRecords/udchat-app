@@ -60,7 +60,11 @@ function install() {
     process.env.FIREBASE_API_KEY = 'fake-server-key';
     process.env.OPENED_FIREBASE_API_KEY = 'fake-browser-key';
     process.env.GOOGLE_CLOUD_TRANSLATION_API_KEY = '';
-    require.cache[require.resolve('firebase-admin')] = { exports: admin };
+    require.cache[require.resolve('firebase-admin/app')] = { exports: {
+        getApps: () => admin.apps, initializeApp: () => admin.initializeApp(), cert: admin.credential.cert,
+    } };
+    require.cache[require.resolve('firebase-admin/auth')] = { exports: { getAuth: () => auth } };
+    require.cache[require.resolve('firebase-admin/firestore')] = { exports: { getFirestore: () => db } };
     seed();
 }
 module.exports = { admin, auth, db, records, writes, claims, seed, install };

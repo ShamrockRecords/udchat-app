@@ -19,7 +19,7 @@ body {
   line-height: 1.75;
   -webkit-font-smoothing: antialiased;
 }
-a { color: var(--green); text-underline-offset: 4px; }
+a { color: var(--green); text-decoration: none; text-underline-offset: 4px; }
 a:hover { color: var(--green-dark); }
 button, input, textarea, select { font: inherit; }
 button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
@@ -32,6 +32,7 @@ h3 { font-size: 1.1rem; }
 .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .18em; color: var(--green); margin: 0 0 10px; }
 .btn { border-radius: 10px; padding: 10px 20px; font-size: 14px; font-weight: 600; line-height: 1.6; transition: background-color .15s, border-color .15s, box-shadow .15s; }
 .btn i { margin-right: 7px; }
+.btn-block { display: block; width: 100%; }
 .btn-primary, .btn-success { background: var(--green); border-color: var(--green); color: white; }
 .btn-primary:hover, .btn-success:hover, .btn-primary:active, .btn-primary:not(:disabled):not(.disabled):active { background: var(--green-dark); border-color: var(--green-dark); }
 .btn-primary:focus, .btn-success:focus { background: var(--green-dark); box-shadow: 0 0 0 3px #b5d3c3; border-color: var(--green-dark); }
@@ -119,7 +120,7 @@ label { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
 .modal-body h3 { overflow-wrap: anywhere; }
 .modal-footer { border-color: var(--line); }
 .modal-backdrop { background: #142f25; }
-.close { color: var(--muted); opacity: 1; }
+.btn-close { opacity: .65; }
 @media (max-width: 767px) {
   .app-nav { padding: 14px 20px; min-height: 72px; }
   .app-nav .navbar-nav { align-items: stretch; padding-top: 12px; }

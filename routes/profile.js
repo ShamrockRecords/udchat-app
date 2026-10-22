@@ -1,5 +1,5 @@
 var express = require('express');
-let admin = require('firebase-admin');
+const { getFirestore } = require('firebase-admin/firestore');
 let firebaseSession = require('../models/firebase_session.js') ;
 var router = express.Router() ;
 
@@ -15,7 +15,7 @@ router.get('/', wrap(async function(req, res, next) {
 
     let currentUser = req.user ;
 
-    let doc = await admin.firestore().collection("users").doc(currentUser.uid).get() ;
+    let doc = await getFirestore().collection("users").doc(currentUser.uid).get() ;
 
     let data = {
         genderType: -1,
@@ -44,7 +44,7 @@ router.post('/update', wrap(async function(req, res, next) {
     let data = { name: require('../models/security').textField(req.body.name, 100, true) };
 
     try {
-        await admin.firestore().collection("users").doc(user.uid).update(data) ;
+        await getFirestore().collection("users").doc(user.uid).update(data) ;
     } catch (error) {
         req.session.errorMessage = error.message ;
     }

@@ -1,5 +1,5 @@
 const express = require('express');
-const admin = require('firebase-admin');
+const { getFirestore } = require('firebase-admin/firestore');
 const firebaseSession = require('../models/firebase_session');
 const { randomUUID } = require('node:crypto');
 const { documentId, textField, equalSecret } = require('../models/security');
@@ -10,14 +10,14 @@ const QRCode = require('qrcode');
 
 async function showChat(req, res) {
     const chatId = documentId(req.method === 'POST' ? req.body.chatId : req.query.chatId);
-    const data = (await admin.firestore().collection('chats').doc(chatId).get()).data();
+    const data = (await getFirestore().collection('chats').doc(chatId).get()).data();
     if (!data) return res.redirect('/');
     await firebaseSession.enter(req, res);
     const currentUser = req.user;
     const uid = currentUser?.uid || randomUUID();
     let name = null;
     if (currentUser) {
-        const profile = (await admin.firestore().collection('users').doc(uid).get()).data();
+        const profile = (await getFirestore().collection('users').doc(uid).get()).data();
         name = profile?.name || null;
     }
     const owner = data.ownerUid === uid;
@@ -43,7 +43,7 @@ router.get('/', showChat);
 router.post('/passcode', showChat);
 router.get('/verify', async (req, res) => {
     const chatId = documentId(req.query.chatId);
-    const doc = await admin.firestore().collection('chats').doc(chatId).get();
+    const doc = await getFirestore().collection('chats').doc(chatId).get();
     res.json({ result: doc.exists });
 });
 module.exports = router;

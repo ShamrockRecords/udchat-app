@@ -1,4 +1,3 @@
-let admin = require('firebase-admin');
 //const sgMail = require('@sendgrid/mail');
 
 class commonFunctions {

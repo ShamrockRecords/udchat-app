@@ -3,7 +3,6 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const { spawn } = require('node:child_process');
-const { createRequire } = require('node:module');
 const path = require('node:path');
 
 test('translation API failures and disabled translation still allow chat initialization', async () => {
@@ -19,18 +18,15 @@ test('translation API failures and disabled translation still allow chat initial
         assert.equal(await vm.runInContext(`new Promise(resolve => translate('${apiKey}', 'こんにちは', 'ja', 'en', resolve))`, context), '');
     }
 });
-test('updated Google SDKs load, construct Firestore references and retain UUID v4 compatibility', async () => {
+test('modular Firebase SDK loads Firestore and rejects a malformed authentication token', async () => {
     const { initializeApp, deleteApp } = require('firebase-admin/app');
     const { getFirestore, Timestamp } = require('firebase-admin/firestore');
+    const { getAuth } = require('firebase-admin/auth');
     const app = initializeApp({ projectId: 'demo-udchat' }, 'runtime-test');
     const db = getFirestore(app);
     assert.equal(db.collection('chats').doc('room').path, 'chats/room');
     assert.equal(Timestamp.fromDate(new Date(0)).toMillis(), 0);
-    for (const name of ['google-gax', 'gaxios', 'teeny-request']) {
-        const fromPackage = createRequire(require.resolve(name));
-        const uuid = fromPackage('uuid');
-        assert.equal(uuid.version(uuid.v4()), 4);
-    }
+    await assert.rejects(getAuth(app).verifyIdToken('invalid-token'));
     await db.terminate();
     await deleteApp(app);
 });

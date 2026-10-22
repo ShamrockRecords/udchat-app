@@ -1,5 +1,5 @@
 var express = require('express');
-let admin = require('firebase-admin');
+const { getFirestore } = require('firebase-admin/firestore');
 let firebaseSession = require('../models/firebase_session.js') ;
 var router = express.Router() ;
 const createError = require('http-errors');
@@ -17,7 +17,7 @@ router.get('/', wrap(async function(req, res, next) {
 
     let currentUser = req.user ;
 
-    let snapshot = await admin.firestore().collection("chats").where("ownerUid", "==", currentUser.uid).orderBy('name').get() ;
+    let snapshot = await getFirestore().collection("chats").where("ownerUid", "==", currentUser.uid).orderBy('name').get() ;
 
     let chats = {} ;
 
@@ -30,12 +30,12 @@ router.get('/', wrap(async function(req, res, next) {
     let userProfile = null ;
 
     {
-        let doc = await admin.firestore().collection("users").doc(currentUser.uid).get() ;
+        let doc = await getFirestore().collection("users").doc(currentUser.uid).get() ;
         userProfile = doc.data() ;
 
         if (userProfile == null) {
             userProfile = {name: '', agreement: '0'} ;
-            await admin.firestore().collection("users").doc(currentUser.uid).set(userProfile) ;
+            await getFirestore().collection("users").doc(currentUser.uid).set(userProfile) ;
         }
     }
 
@@ -64,7 +64,7 @@ router.post('/agreement', wrap(async function(req, res, next) {
 
     let currentUser = req.user ;
 
-    await admin.firestore().collection('users').doc(currentUser.uid).set({ agreement: '1' }, { merge: true });
+    await getFirestore().collection('users').doc(currentUser.uid).set({ agreement: '1' }, { merge: true });
 
     res.redirect('/');
 })) ;
@@ -78,13 +78,14 @@ router.post('/delete', wrap(async function(req, res, next) {
     }
 
     const chatId = documentId(req.body.chatId);
-    const ref = admin.firestore().collection('chats').doc(chatId);
-    await admin.firestore().runTransaction(async transaction => {
+    const ref = getFirestore().collection('chats').doc(chatId);
+    await getFirestore().runTransaction(async transaction => {
         const room = (await transaction.get(ref)).data();
         if (!room) throw createError(404);
         if (room.ownerUid !== req.user.uid) throw createError(403);
         transaction.delete(ref);
     });
+    require('../models/socket').revokeRoom(chatId);
 
     res.redirect('/') ;
 })) ;
@@ -110,7 +111,7 @@ router.get('/download', wrap(async function(req, res, next) {
     let data = {} ;
 
     if (chatId != undefined) {
-        let doc = await admin.firestore().collection("chats").doc(chatId).get() ;
+        let doc = await getFirestore().collection("chats").doc(chatId).get() ;
         data = doc.data() ;
 
         if (!data || data.ownerUid != currentUser.uid) {
@@ -125,7 +126,7 @@ router.get('/download', wrap(async function(req, res, next) {
 
     targetDate.setDate(targetDate.getDate() - 3) ;
 
-    let snapshot = await admin.firestore().collection("chat").doc(chatId).collection("messages").where("timestamp", ">", targetDate).orderBy('timestamp').get() ;
+    let snapshot = await getFirestore().collection("chat").doc(chatId).collection("messages").where("timestamp", ">", targetDate).orderBy('timestamp').get() ;
  
     res.type('text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', "attachment; filename*=UTF-8''" + encodeURIComponent(data.name) + '.csv');

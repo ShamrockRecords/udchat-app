@@ -192,3 +192,22 @@ test('production rejects missing secrets and issues secure cookies behind the pr
     `;
     execFileSync(process.execPath, ['-e', code], { env, stdio: 'pipe' });
 });
+test('successful reset emails and signup requests share a bounded email quota', async t => {
+    let calls = 0;
+    t.mock.method(global, 'fetch', async () => {
+        calls++;
+        return { ok: true, json: async () => ({}) };
+    });
+    const { post } = await client();
+    let blocked = false;
+    for (let i = 0; i < 31; i++) {
+        const result = await post('/reset_password', { email: 'guest@example.test' });
+        if (result.status === 429) { blocked = true; break; }
+        assert.equal(result.status, 302);
+    }
+    assert.equal(blocked, true);
+    const previous = calls;
+    await post('/signup', { email: 'guest@example.test', password: 'test-password' }).expect(429);
+    await post('/reset_password', { email: 'another@example.test' }).expect(429);
+    assert.equal(calls, previous);
+});
